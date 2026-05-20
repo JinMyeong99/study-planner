@@ -12,6 +12,8 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@tanstack/react-query": "^5.100.11",
+    "msw": "^2.14.6",
     "react": "^19.2.6",
     "react-dom": "^19.2.6"
   },
