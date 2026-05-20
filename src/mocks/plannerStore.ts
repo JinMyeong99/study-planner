@@ -53,9 +53,6 @@ const initialPlannerBlocksByWeek = new Map<string, StudyBlock[]>([
   ],
 ])
 
-let plannerBlocksByWeek = clonePlannerMap(initialPlannerBlocksByWeek)
-let nextBlockId = 3
-
 const cloneBlock = (block: StudyBlock): StudyBlock => ({ ...block })
 
 function clonePlannerMap(source: Map<string, StudyBlock[]>) {
@@ -66,6 +63,9 @@ function clonePlannerMap(source: Map<string, StudyBlock[]>) {
     ]),
   )
 }
+
+let plannerBlocksByWeek = clonePlannerMap(initialPlannerBlocksByWeek)
+let nextBlockId = 3
 
 const createBlockId = () => {
   const id = `block-${nextBlockId}`
