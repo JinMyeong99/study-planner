@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react'
+import { useEffect, useRef, useState, type FormEvent } from 'react'
 
 import type { Course, StudyBlock } from './types'
 import { areBlocksOverlapping } from './utils/conflict'
@@ -121,8 +121,17 @@ export const PlannerBlockModal = ({
 }: PlannerBlockModalProps) => {
   const [values, setValues] = useState(initialValues)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [isConfirmingDelete, setIsConfirmingDelete] = useState(false)
+  const cancelDeleteButtonRef = useRef<HTMLButtonElement>(null)
   const courseMap = createCourseMap(courses)
+  const deleteConfirmMessage = `'${courseMap.get(values.courseId)?.title ?? '이 강의'}'를 삭제할까요?`
   const memoLength = values.memo.length
+
+  useEffect(() => {
+    if (!isConfirmingDelete) return
+
+    cancelDeleteButtonRef.current?.focus()
+  }, [isConfirmingDelete])
 
   const updateValue = <Key extends keyof PlannerBlockFormValues>(
     key: Key,
@@ -275,7 +284,7 @@ export const PlannerBlockModal = ({
               <div className="planner-modal__delete">
                 <button
                   className="planner-modal__danger-button"
-                  onClick={onDelete}
+                  onClick={() => setIsConfirmingDelete(true)}
                   type="button"
                 >
                   삭제
@@ -298,6 +307,42 @@ export const PlannerBlockModal = ({
           </div>
         </form>
       </section>
+
+      {isConfirmingDelete ? (
+        <div
+          className="planner-delete-confirm-backdrop"
+          onClick={() => setIsConfirmingDelete(false)}
+        >
+          <div
+            className="planner-delete-confirm"
+            role="alertdialog"
+            aria-modal="true"
+            aria-labelledby="delete-confirm-title"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <p id="delete-confirm-title" className="planner-delete-confirm__message">
+              {deleteConfirmMessage}
+            </p>
+            <div className="planner-delete-confirm__actions">
+              <button
+                ref={cancelDeleteButtonRef}
+                className="planner-modal__secondary-button"
+                onClick={() => setIsConfirmingDelete(false)}
+                type="button"
+              >
+                취소
+              </button>
+              <button
+                className="planner-modal__danger-button"
+                onClick={onDelete}
+                type="button"
+              >
+                삭제
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   )
 }
