@@ -9,6 +9,7 @@ import {
 import { parseTimeToMinutes } from './utils/time'
 import { useEditablePlannerState } from './hooks/useEditablePlannerState'
 import { usePlannerData } from './hooks/usePlannerData'
+import { PlannerWeekGrid } from './PlannerWeekGrid'
 import type { Course, StudyBlock } from './types'
 import './PlannerPage.css'
 
@@ -146,13 +147,10 @@ export const PlannerPage = ({ initialWeekStart }: PlannerPageProps) => {
               <h2 id="planner-grid-title">주간 시간표</h2>
               <span>08:00 - 20:00 · 30분 단위 예정</span>
             </div>
-            <div className="planner-grid-placeholder">
-              <strong>시간 그리드 준비 영역</strong>
-              <p>
-                다음 작업에서 7일 × 시간대 그리드와 블록 위치 계산을 이
-                영역에 연결합니다.
-              </p>
-            </div>
+            <PlannerWeekGrid
+              blocks={editablePlanner.draftBlocks}
+              courses={plannerData.courses}
+            />
           </section>
 
           <section
