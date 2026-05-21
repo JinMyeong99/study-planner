@@ -6,49 +6,6 @@
     linear-gradient(135deg, #f7f8fb 0%, #eef2f8 100%);
 }
 
-.planner-hero {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 24px;
-  max-width: 1180px;
-  margin: 0 auto 28px;
-}
-
-.planner-hero h1 {
-  margin: 0;
-  color: #121b2f;
-  font-size: clamp(1.8rem, 3vw, 2.75rem);
-  line-height: 1.08;
-}
-
-.planner-hero p {
-  margin: 10px 0 0;
-  color: #526070;
-  font-size: 1.05rem;
-}
-
-.planner-status-panel {
-  display: grid;
-  gap: 10px;
-  min-width: 280px;
-  padding: 18px;
-  border: 1px solid rgba(18, 27, 47, 0.08);
-  border-radius: 22px;
-  background: rgba(255, 255, 255, 0.78);
-  box-shadow: 0 18px 50px rgba(32, 43, 68, 0.08);
-}
-
-.planner-status-panel span {
-  display: flex;
-  justify-content: space-between;
-  gap: 16px;
-  color: #667085;
-}
-
-.planner-status-panel strong {
-  color: #172033;
-}
 
 .planner-save-button {
   border: 0;
@@ -66,11 +23,18 @@
   color: #667085;
 }
 
-.planner-save-footer {
+.planner-grid-footer {
   display: flex;
+  align-items: center;
   justify-content: flex-end;
-  max-width: 1180px;
-  margin: 16px auto 0;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.planner-dirty-indicator {
+  color: #667085;
+  font-size: 0.88rem;
+  font-weight: 600;
 }
 
 .planner-toast {
@@ -183,22 +147,7 @@
   color: #8d1f2d;
 }
 
-.planner-message p {
-  margin: 8px 0 14px;
-}
-
-.planner-message button {
-  border: 0;
-  border-radius: 999px;
-  padding: 10px 14px;
-  background: #172033;
-  color: #ffffff;
-  font-weight: 700;
-}
-
 .planner-summary {
-  max-width: 1180px;
-  margin: 20px auto 0;
   padding: 22px;
   border: 1px solid rgba(18, 27, 47, 0.08);
   border-radius: 28px;
@@ -212,9 +161,19 @@
   font-weight: 800;
 }
 
+.planner-summary__empty {
+  margin: 0;
+  color: #667085;
+  font-size: 0.95rem;
+}
+
 .planner-summary__grid {
   display: grid;
   gap: 20px;
+}
+
+.planner-summary__chart {
+  margin-bottom: 12px;
 }
 
 .planner-summary__label {
@@ -262,15 +221,31 @@
   white-space: nowrap;
 }
 
-.planner-summary__chart {
-  margin-bottom: 12px;
+.planner-message p {
+  margin: 8px 0 14px;
+}
+
+.planner-message button {
+  border: 0;
+  border-radius: 999px;
+  padding: 10px 14px;
+  background: #172033;
+  color: #ffffff;
+  font-weight: 700;
 }
 
 .planner-layout {
   display: grid;
+  grid-template-columns: 3fr 1fr;
   gap: 20px;
   max-width: 1180px;
   margin: 0 auto;
+}
+
+.planner-side {
+  display: grid;
+  gap: 20px;
+  align-content: start;
 }
 
 .planner-panel {
@@ -442,9 +417,8 @@
   align-content: start;
   gap: 4px;
   overflow: hidden;
-  padding: 9px 9px 9px 10px;
+  padding: 9px;
   border: 1px solid color-mix(in srgb, var(--planner-block-color) 42%, white);
-  border-left: 5px solid var(--planner-block-color);
   border-radius: 14px;
   background: linear-gradient(135deg, var(--planner-block-bg), #ffffff 92%);
   box-shadow: 0 12px 24px rgba(32, 43, 68, 0.12);
@@ -461,7 +435,6 @@
 
 .planner-week-grid__block.is-conflict {
   border-color: rgba(180, 35, 53, 0.52);
-  border-left-color: #b42335;
   background: linear-gradient(135deg, #fff1f3, #ffffff 92%);
   box-shadow: 0 14px 30px rgba(180, 35, 53, 0.16);
 }
@@ -753,22 +726,21 @@
     padding: 28px 18px;
   }
 
-  .planner-hero,
   .planner-layout {
     grid-template-columns: 1fr;
   }
 
-  .planner-hero {
-    display: grid;
-    align-items: stretch;
-  }
-
-  .planner-status-panel {
-    min-width: 0;
+  .planner-summary {
+    padding: 18px;
   }
 
   .planner-save-button {
     width: 100%;
+  }
+
+  .planner-grid-footer {
+    flex-wrap: wrap;
+    justify-content: flex-end;
   }
 
   .planner-toast {

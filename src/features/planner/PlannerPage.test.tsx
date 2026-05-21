@@ -31,7 +31,7 @@ describe('PlannerPage', () => {
     expect(screen.getAllByText('TypeScript 기초')).toHaveLength(3)
     expect(screen.getByText('월요일 · 09:00 - 10:30')).toBeInTheDocument()
     expect(screen.getByText('수요일 · 14:00 - 16:00')).toBeInTheDocument()
-    expect(screen.getByText('변경 없음')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '저장' })).toBeDisabled()
   })
 
   it('주간 시간 그리드와 시간 라벨을 렌더링한다', async () => {
@@ -144,9 +144,7 @@ describe('PlannerPage', () => {
   it('변경 사항이 없으면 저장 버튼을 비활성화한다', async () => {
     renderWithQueryClient(<PlannerPage initialWeekStart="2026-05-18" />)
 
-    await screen.findByText('변경 없음')
-
-    expect(screen.getByRole('button', { name: '저장' })).toBeDisabled()
+    expect(await screen.findByRole('button', { name: '저장' })).toBeDisabled()
   })
 
   it('저장 성공 시 서버 응답으로 동기화하고 dirty 상태를 초기화한다', async () => {
@@ -193,7 +191,6 @@ describe('PlannerPage', () => {
 
     expect(screen.getByRole('button', { name: '저장 중...' })).toBeDisabled()
     expect(await screen.findByText('저장되었습니다.')).toBeInTheDocument()
-    expect(screen.getByText('변경 없음')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: '저장' })).toBeDisabled()
 
     await waitFor(() => {
@@ -368,7 +365,7 @@ describe('PlannerPage', () => {
       screen.getByText('종료 시간은 시작 시간보다 늦어야 합니다.'),
     ).toBeInTheDocument()
     expect(screen.queryByText('월요일 · 10:30 - 10:30')).not.toBeInTheDocument()
-    expect(screen.getByText('변경 없음')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '저장' })).toBeDisabled()
   })
 
   it('겹치는 시간 블록이면 충돌 메시지를 보여주고 draft에 반영하지 않는다', async () => {
@@ -390,7 +387,7 @@ describe('PlannerPage', () => {
       ),
     ).toBeInTheDocument()
     expect(screen.queryByText('월요일 · 09:30 - 10:00')).not.toBeInTheDocument()
-    expect(screen.getByText('변경 없음')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '저장' })).toBeDisabled()
   })
 
   it('메모가 200자를 초과하면 draft에 반영하지 않는다', async () => {
@@ -411,7 +408,7 @@ describe('PlannerPage', () => {
       screen.getByText('메모는 200자 이하로 입력해 주세요.'),
     ).toBeInTheDocument()
     expect(screen.queryByText('월요일 · 10:30 - 11:00')).not.toBeInTheDocument()
-    expect(screen.getByText('변경 없음')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '저장' })).toBeDisabled()
   })
 
   it('플래너 조회 실패 시 에러와 재시도 버튼을 렌더링한다', async () => {
