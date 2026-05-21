@@ -1,21 +1,12 @@
 import type { StudyBlock } from '../types'
 import {
+  formatMinutesToTime,
   parseTimeToMinutes,
   plannerEndMinutes,
   plannerStartMinutes,
   PLANNER_MINUTES_PER_HOUR,
   PLANNER_SLOT_MINUTES,
 } from './time'
-
-const formatMinutesToTime = (minutes: number) => {
-  const hours = Math.floor(minutes / PLANNER_MINUTES_PER_HOUR)
-  const restMinutes = minutes % PLANNER_MINUTES_PER_HOUR
-
-  return `${String(hours).padStart(2, '0')}:${String(restMinutes).padStart(
-    2,
-    '0',
-  )}`
-}
 
 export const plannerTotalMinutes = plannerEndMinutes - plannerStartMinutes
 
