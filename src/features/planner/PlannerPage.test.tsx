@@ -23,6 +23,13 @@ const renderWithQueryClient = (ui: ReactElement) => {
   )
 }
 
+const dispatchBeforeUnloadEvent = () => {
+  const event = new Event('beforeunload', { cancelable: true })
+  window.dispatchEvent(event)
+
+  return event
+}
+
 describe('PlannerPage', () => {
   it('저장된 주간 블록을 렌더링한다', async () => {
     renderWithQueryClient(<PlannerPage initialWeekStart="2026-05-18" />)
@@ -139,6 +146,7 @@ describe('PlannerPage', () => {
     expect(screen.getByText('월요일 · 10:30 - 11:00')).toBeInTheDocument()
     expect(screen.getByText('저장되지 않은 변경 사항')).toBeInTheDocument()
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(dispatchBeforeUnloadEvent().defaultPrevented).toBe(true)
   })
 
   it('변경 사항이 없으면 저장 버튼을 비활성화한다', async () => {
@@ -192,6 +200,7 @@ describe('PlannerPage', () => {
     expect(screen.getByRole('button', { name: '저장 중...' })).toBeDisabled()
     expect(await screen.findByText('저장되었습니다.')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: '저장' })).toBeDisabled()
+    expect(dispatchBeforeUnloadEvent().defaultPrevented).toBe(false)
 
     await waitFor(() => {
       expect(savedBlocksPayload).not.toBeNull()
@@ -234,6 +243,7 @@ describe('PlannerPage', () => {
     expect(screen.getByText('월요일 · 10:30 - 11:00')).toBeInTheDocument()
     expect(screen.getByText('저장되지 않은 변경 사항')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: '저장' })).toBeEnabled()
+    expect(dispatchBeforeUnloadEvent().defaultPrevented).toBe(true)
   })
 
   it('충돌 블록을 경고 메시지와 배지로 표시한다', async () => {
