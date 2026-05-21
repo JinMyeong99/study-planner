@@ -214,6 +214,52 @@
   border-bottom-color: rgba(18, 27, 47, 0.12);
 }
 
+.planner-week-grid__block {
+  position: absolute;
+  right: 8px;
+  left: 8px;
+  overflow: hidden;
+  padding: 10px 10px 10px 12px;
+  border: 1px solid color-mix(in srgb, var(--planner-block-color) 42%, white);
+  border-left: 5px solid var(--planner-block-color);
+  border-radius: 14px;
+  background: linear-gradient(135deg, var(--planner-block-bg), #ffffff 92%);
+  box-shadow: 0 12px 24px rgba(32, 43, 68, 0.12);
+}
+
+.planner-week-grid__block strong,
+.planner-week-grid__block span,
+.planner-week-grid__block p {
+  display: block;
+}
+
+.planner-week-grid__block strong {
+  overflow: hidden;
+  color: #172033;
+  font-size: 0.86rem;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.planner-week-grid__block span {
+  margin-top: 4px;
+  color: #475467;
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+.planner-week-grid__block p {
+  display: -webkit-box;
+  overflow: hidden;
+  margin: 6px 0 0;
+  color: #667085;
+  font-size: 0.75rem;
+  line-height: 1.35;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
 .planner-block-list {
   display: grid;
   gap: 12px;
