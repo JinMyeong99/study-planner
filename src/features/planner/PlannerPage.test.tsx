@@ -104,7 +104,7 @@ describe('PlannerPage', () => {
     renderWithQueryClient(<PlannerPage initialWeekStart="2099-01-04" />)
 
     expect(
-      await screen.findByText('이번 주 학습 블록이 없습니다.'),
+      await screen.findByText('이번 주 강의가 없습니다.'),
     ).toBeInTheDocument()
     expect(
       screen.getByRole('region', { name: '주간 시간 그리드' }),
@@ -127,7 +127,7 @@ describe('PlannerPage', () => {
       await screen.findByText('2026년 5월 25일 - 5월 31일'),
     ).toBeInTheDocument()
     expect(screen.getAllByLabelText('월요일 5/25').length).toBeGreaterThan(0)
-    expect(screen.getByText('이번 주 학습 블록이 없습니다.')).toBeInTheDocument()
+    expect(screen.getByText('이번 주 강의가 없습니다.')).toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: '이전 주로 이동' }))
 
@@ -203,7 +203,7 @@ describe('PlannerPage', () => {
     expect(
       await screen.findByText('2026년 5월 25일 - 5월 31일'),
     ).toBeInTheDocument()
-    expect(screen.getByText('이번 주 학습 블록이 없습니다.')).toBeInTheDocument()
+    expect(screen.getByText('이번 주 강의가 없습니다.')).toBeInTheDocument()
     expect(screen.queryByText('월요일 · 10:30 - 11:00')).not.toBeInTheDocument()
     expect(screen.queryByText('저장되지 않은 변경 사항')).not.toBeInTheDocument()
     expect(dispatchBeforeUnloadEvent().defaultPrevented).toBe(false)

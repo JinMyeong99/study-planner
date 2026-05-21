@@ -127,8 +127,7 @@ const PlannerBlockList = ({
   if (sortedBlocks.length === 0) {
     return (
       <div className="planner-empty-state">
-        <strong>이번 주 학습 블록이 없습니다.</strong>
-        <span>시간 슬롯을 클릭해 학습 블록을 추가할 수 있습니다.</span>
+        <strong>이번 주 강의가 없습니다.</strong>
       </div>
     )
   }

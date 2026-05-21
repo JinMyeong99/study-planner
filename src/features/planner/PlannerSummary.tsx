@@ -66,6 +66,11 @@ export const PlannerSummary = ({ blocks, courses }: PlannerSummaryProps) => {
         </span>
       </div>
 
+      {blocks.length === 0 && (
+        <p className="planner-summary__empty">
+          이번 주 등록된 강의가 없습니다.
+        </p>
+      )}
       {blocks.length > 0 && (
         <div className="planner-summary__grid">
           <div>
