@@ -1,10 +1,12 @@
 import { describe, expect, it } from 'vitest'
 
 import {
+  addWeeksToLocalDate,
   formatDayOfWeek,
   formatLocalDate,
   getWeekDateRangeLabel,
   getWeekStartDate,
+  getWeekdayDateLabels,
   parseLocalDate,
 } from './date'
 
@@ -33,6 +35,33 @@ describe('planner date utils', () => {
     expect(date.getFullYear()).toBe(2026)
     expect(date.getMonth()).toBe(4)
     expect(date.getDate()).toBe(18)
+  })
+
+  it('주 시작일을 주 단위로 이동한다', () => {
+    expect(addWeeksToLocalDate('2026-05-18', -1)).toBe('2026-05-11')
+    expect(addWeeksToLocalDate('2026-05-18', 1)).toBe('2026-05-25')
+    expect(addWeeksToLocalDate('2026-12-28', 1)).toBe('2027-01-04')
+  })
+
+  it('주간 요일별 날짜 라벨을 계산한다', () => {
+    expect(getWeekdayDateLabels('2026-05-18')).toEqual([
+      '5/18',
+      '5/19',
+      '5/20',
+      '5/21',
+      '5/22',
+      '5/23',
+      '5/24',
+    ])
+    expect(getWeekdayDateLabels('2026-12-28')).toEqual([
+      '12/28',
+      '12/29',
+      '12/30',
+      '12/31',
+      '1/1',
+      '1/2',
+      '1/3',
+    ])
   })
 
   it('주간 범위 라벨을 월요일부터 일요일까지 표시한다', () => {

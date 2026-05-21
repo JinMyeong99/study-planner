@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { PlannerApiError, savePlanner } from './api'
@@ -7,6 +7,7 @@ import {
   type PlannerBlockFormValues,
 } from './PlannerBlockModal'
 import {
+  addWeeksToLocalDate,
   formatDayOfWeek,
   formatLocalDate,
   getWeekDateRangeLabel,
@@ -49,6 +50,10 @@ type SaveFeedback =
       type: 'success' | 'error'
     }
   | null
+
+const WEEK_CHANGE_CONFIRM_TITLE = '저장되지 않은 변경 사항이 있습니다'
+const WEEK_CHANGE_CONFIRM_DESCRIPTION =
+  '다른 주로 이동하면 현재 주의 변경 사항이 사라집니다.'
 
 const sortPlannerBlocks = (blocks: StudyBlock[]) =>
   [...blocks].sort((firstBlock, secondBlock) => {
@@ -178,7 +183,11 @@ export const PlannerPage = ({ initialWeekStart }: PlannerPageProps) => {
   const [isToastDismissing, setIsToastDismissing] = useState(false)
   const queryClient = useQueryClient()
   const defaultWeekStart = useMemo(() => getCurrentWeekStart(), [])
-  const weekStart = initialWeekStart ?? defaultWeekStart
+  const [weekStart, setWeekStart] = useState(
+    () => initialWeekStart ?? defaultWeekStart,
+  )
+  const [pendingWeekStart, setPendingWeekStart] = useState<string | null>(null)
+  const keepEditingButtonRef = useRef<HTMLButtonElement>(null)
   const plannerData = usePlannerData(weekStart)
   const isPlannerReady = !plannerData.isLoading && !plannerData.isError
   const editablePlanner = useEditablePlannerState({
@@ -229,6 +238,11 @@ export const PlannerPage = ({ initialWeekStart }: PlannerPageProps) => {
     const timer = setTimeout(dismissToast, 3000)
     return () => clearTimeout(timer)
   }, [saveFeedback])
+  useEffect(() => {
+    if (!pendingWeekStart) return
+
+    keepEditingButtonRef.current?.focus()
+  }, [pendingWeekStart])
   const canShowPlannerContent = isPlannerReady && editablePlanner.isReady
   const canSavePlanner =
     canShowPlannerContent && editablePlanner.isDirty && !saveMutation.isPending
@@ -258,6 +272,48 @@ export const PlannerPage = ({ initialWeekStart }: PlannerPageProps) => {
     }
 
     closeModal()
+  }
+
+  const clearTransientPlannerUi = () => {
+    setModalState(null)
+    setSaveFeedback(null)
+    setIsToastDismissing(false)
+  }
+
+  const moveToWeek = (nextWeekStart: string) => {
+    clearTransientPlannerUi()
+    setWeekStart(nextWeekStart)
+  }
+
+  const handleWeekChange = (amount: number) => {
+    if (saveMutation.isPending) {
+      return
+    }
+
+    const nextWeekStart = addWeeksToLocalDate(weekStart, amount)
+
+    if (editablePlanner.isDirty) {
+      setPendingWeekStart(nextWeekStart)
+      return
+    }
+
+    moveToWeek(nextWeekStart)
+  }
+
+  const cancelWeekChange = () => {
+    setPendingWeekStart(null)
+  }
+
+  const confirmWeekChange = () => {
+    if (!pendingWeekStart) {
+      return
+    }
+
+    const nextWeekStart = pendingWeekStart
+
+    editablePlanner.resetDraft()
+    setPendingWeekStart(null)
+    moveToWeek(nextWeekStart)
   }
 
   const handleModalDelete = () => {
@@ -319,9 +375,29 @@ export const PlannerPage = ({ initialWeekStart }: PlannerPageProps) => {
       {canShowPlannerContent ? (
         <div className="planner-layout">
           <section className="planner-panel" aria-labelledby="planner-grid-title">
-            <div className="planner-panel__header">
-              <h2 id="planner-grid-title">주간 시간표</h2>
-              <span>{getWeekDateRangeLabel(weekStart)}</span>
+            <div className="planner-panel__header planner-panel__header--with-navigation">
+              <div className="planner-panel__title">
+                <h2 id="planner-grid-title">주간 학습 플래너</h2>
+                <span>{getWeekDateRangeLabel(weekStart)}</span>
+              </div>
+              <div className="planner-week-navigation" aria-label="주간 이동">
+                <button
+                  aria-label="이전 주로 이동"
+                  disabled={saveMutation.isPending}
+                  onClick={() => handleWeekChange(-1)}
+                  type="button"
+                >
+                  <span aria-hidden="true">‹</span>
+                </button>
+                <button
+                  aria-label="다음 주로 이동"
+                  disabled={saveMutation.isPending}
+                  onClick={() => handleWeekChange(1)}
+                  type="button"
+                >
+                  <span aria-hidden="true">›</span>
+                </button>
+              </div>
             </div>
             {conflictMessage ? (
               <p className="planner-conflict-alert" role="alert">
@@ -332,6 +408,7 @@ export const PlannerPage = ({ initialWeekStart }: PlannerPageProps) => {
               blocks={editablePlanner.draftBlocks}
               conflictBlockIds={conflictBlockIds}
               courses={plannerData.courses}
+              weekStart={weekStart}
               onBlockClick={(block) => {
                 setModalState({
                   block,
@@ -408,6 +485,46 @@ export const PlannerPage = ({ initialWeekStart }: PlannerPageProps) => {
           >
             ×
           </button>
+        </div>
+      ) : null}
+
+      {pendingWeekStart ? (
+        <div
+          className="planner-week-change-confirm-backdrop"
+          onClick={cancelWeekChange}
+        >
+          <div
+            className="planner-week-change-confirm"
+            role="alertdialog"
+            aria-modal="true"
+            aria-labelledby="week-change-confirm-title"
+            aria-describedby="week-change-confirm-description"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <strong id="week-change-confirm-title">
+              {WEEK_CHANGE_CONFIRM_TITLE}
+            </strong>
+            <p id="week-change-confirm-description">
+              {WEEK_CHANGE_CONFIRM_DESCRIPTION}
+            </p>
+            <div className="planner-week-change-confirm__actions">
+              <button
+                ref={keepEditingButtonRef}
+                className="planner-modal__secondary-button"
+                onClick={cancelWeekChange}
+                type="button"
+              >
+                계속 편집
+              </button>
+              <button
+                className="planner-modal__danger-button"
+                onClick={confirmWeekChange}
+                type="button"
+              >
+                변경 버리고 이동
+              </button>
+            </div>
+          </div>
         </div>
       ) : null}
 

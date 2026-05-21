@@ -1,7 +1,7 @@
 import { useState, type CSSProperties } from 'react'
 
 import type { Course, StudyBlock } from './types'
-import { PLANNER_WEEKDAY_LABELS } from './utils/date'
+import { getWeekdayDateLabels, PLANNER_WEEKDAY_LABELS } from './utils/date'
 import {
   createPlannerHourLabels,
   createPlannerTimeSlots,
@@ -15,6 +15,7 @@ interface PlannerWeekGridProps {
   courses: Course[]
   onBlockClick: (block: StudyBlock) => void
   onSlotClick: (selection: { dayOfWeek: number; startTime: string }) => void
+  weekStart: string
 }
 
 const timeSlots = createPlannerTimeSlots()
@@ -51,10 +52,12 @@ export const PlannerWeekGrid = ({
   courses,
   onBlockClick,
   onSlotClick,
+  weekStart,
 }: PlannerWeekGridProps) => {
   const [selectedDayOfWeek, setSelectedDayOfWeek] = useState(0)
   const courseMap = createCourseMap(courses)
   const blocksByDay = getBlocksByDay(blocks)
+  const weekdayDateLabels = getWeekdayDateLabels(weekStart)
 
   return (
     <div
@@ -67,36 +70,48 @@ export const PlannerWeekGrid = ({
         className="planner-week-grid__day-tabs"
         role="tablist"
       >
-        {PLANNER_WEEKDAY_LABELS.map((weekday, dayOfWeek) => (
-          <button
-            aria-selected={selectedDayOfWeek === dayOfWeek}
-            className="planner-week-grid__day-tab"
-            key={weekday}
-            onClick={() => {
-              setSelectedDayOfWeek(dayOfWeek)
-            }}
-            role="tab"
-            type="button"
-          >
-            {weekday}
-          </button>
-        ))}
+        {PLANNER_WEEKDAY_LABELS.map((weekday, dayOfWeek) => {
+          const dateLabel = weekdayDateLabels[dayOfWeek]
+
+          return (
+            <button
+              aria-label={`${weekday}요일 ${dateLabel}`}
+              aria-selected={selectedDayOfWeek === dayOfWeek}
+              className="planner-week-grid__day-tab"
+              key={weekday}
+              onClick={() => {
+                setSelectedDayOfWeek(dayOfWeek)
+              }}
+              role="tab"
+              type="button"
+            >
+              <span className="planner-week-grid__day-label">{weekday}</span>
+              <span className="planner-week-grid__date-label">{dateLabel}</span>
+            </button>
+          )
+        })}
       </div>
 
       <div className="planner-week-grid__header">
         <span aria-hidden="true" />
-        {PLANNER_WEEKDAY_LABELS.map((weekday, dayOfWeek) => (
-          <strong
-            className={
-              selectedDayOfWeek === dayOfWeek
-                ? 'planner-week-grid__weekday is-selected'
-                : 'planner-week-grid__weekday'
-            }
-            key={weekday}
-          >
-            {weekday}
-          </strong>
-        ))}
+        {PLANNER_WEEKDAY_LABELS.map((weekday, dayOfWeek) => {
+          const dateLabel = weekdayDateLabels[dayOfWeek]
+
+          return (
+            <strong
+              aria-label={`${weekday}요일 ${dateLabel}`}
+              className={
+                selectedDayOfWeek === dayOfWeek
+                  ? 'planner-week-grid__weekday is-selected'
+                  : 'planner-week-grid__weekday'
+              }
+              key={weekday}
+            >
+              <span className="planner-week-grid__day-label">{weekday}</span>
+              <span className="planner-week-grid__date-label">{dateLabel}</span>
+            </strong>
+          )
+        })}
       </div>
 
       <div

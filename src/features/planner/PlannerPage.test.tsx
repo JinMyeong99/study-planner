@@ -45,13 +45,15 @@ describe('PlannerPage', () => {
     renderWithQueryClient(<PlannerPage initialWeekStart="2026-05-18" />)
 
     expect(
-      await screen.findByRole('heading', { name: '주간 시간표' }),
+      await screen.findByRole('heading', { name: '주간 학습 플래너' }),
     ).toBeInTheDocument()
     expect(
       screen.getByRole('region', { name: '주간 시간 그리드' }),
     ).toBeInTheDocument()
     expect(screen.getByLabelText('월요일')).toBeInTheDocument()
     expect(screen.getByLabelText('일요일')).toBeInTheDocument()
+    expect(screen.getAllByLabelText('월요일 5/18').length).toBeGreaterThan(0)
+    expect(screen.getAllByLabelText('일요일 5/24').length).toBeGreaterThan(0)
     expect(screen.getByText('08:00')).toBeInTheDocument()
     expect(screen.getByText('12:00')).toBeInTheDocument()
     expect(screen.getByText('20:00')).toBeInTheDocument()
@@ -80,18 +82,18 @@ describe('PlannerPage', () => {
       name: '주간 시간 그리드',
     })
 
-    expect(screen.getByRole('tab', { name: '월' })).toHaveAttribute(
+    expect(screen.getByRole('tab', { name: '월요일 5/18' })).toHaveAttribute(
       'aria-selected',
       'true',
     )
 
-    await user.click(screen.getByRole('tab', { name: '수' }))
+    await user.click(screen.getByRole('tab', { name: '수요일 5/20' }))
 
-    expect(screen.getByRole('tab', { name: '월' })).toHaveAttribute(
+    expect(screen.getByRole('tab', { name: '월요일 5/18' })).toHaveAttribute(
       'aria-selected',
       'false',
     )
-    expect(screen.getByRole('tab', { name: '수' })).toHaveAttribute(
+    expect(screen.getByRole('tab', { name: '수요일 5/20' })).toHaveAttribute(
       'aria-selected',
       'true',
     )
@@ -107,6 +109,104 @@ describe('PlannerPage', () => {
     expect(
       screen.getByRole('region', { name: '주간 시간 그리드' }),
     ).toBeInTheDocument()
+  })
+
+  it('주간 이동 버튼으로 다음 주와 이전 주를 이동한다', async () => {
+    const user = userEvent.setup()
+
+    renderWithQueryClient(<PlannerPage initialWeekStart="2026-05-18" />)
+
+    expect(
+      await screen.findByText('2026년 5월 18일 - 5월 24일'),
+    ).toBeInTheDocument()
+    expect(screen.getAllByLabelText('월요일 5/18').length).toBeGreaterThan(0)
+
+    await user.click(screen.getByRole('button', { name: '다음 주로 이동' }))
+
+    expect(
+      await screen.findByText('2026년 5월 25일 - 5월 31일'),
+    ).toBeInTheDocument()
+    expect(screen.getAllByLabelText('월요일 5/25').length).toBeGreaterThan(0)
+    expect(screen.getByText('이번 주 학습 블록이 없습니다.')).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: '이전 주로 이동' }))
+
+    expect(
+      await screen.findByText('2026년 5월 18일 - 5월 24일'),
+    ).toBeInTheDocument()
+    expect(screen.getAllByLabelText('월요일 5/18').length).toBeGreaterThan(0)
+    expect(screen.getByText('월요일 · 09:00 - 10:30')).toBeInTheDocument()
+  })
+
+  it('dirty 상태에서 주간 이동을 취소하면 현재 주차와 draft를 유지한다', async () => {
+    const user = userEvent.setup()
+
+    renderWithQueryClient(<PlannerPage initialWeekStart="2026-05-18" />)
+
+    await user.click(
+      await screen.findByRole('button', {
+        name: '월요일 10:30 학습 블록 추가',
+      }),
+    )
+    await user.selectOptions(screen.getByLabelText('강의'), 'course-react')
+    await user.click(screen.getByRole('button', { name: '확인' }))
+    await user.click(screen.getByRole('button', { name: '다음 주로 이동' }))
+
+    const confirmDialog = screen.getByRole('alertdialog', {
+      name: '저장되지 않은 변경 사항이 있습니다',
+    })
+
+    expect(
+      within(confirmDialog).getByText(
+        '다른 주로 이동하면 현재 주의 변경 사항이 사라집니다.',
+      ),
+    ).toBeInTheDocument()
+    expect(
+      within(confirmDialog).getByRole('button', { name: '계속 편집' }),
+    ).toHaveFocus()
+    expect(screen.getByText('2026년 5월 18일 - 5월 24일')).toBeInTheDocument()
+
+    await user.click(
+      within(confirmDialog).getByRole('button', { name: '계속 편집' }),
+    )
+
+    expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument()
+    expect(screen.getByText('2026년 5월 18일 - 5월 24일')).toBeInTheDocument()
+    expect(screen.getByText('월요일 · 10:30 - 11:00')).toBeInTheDocument()
+    expect(screen.getByText('저장되지 않은 변경 사항')).toBeInTheDocument()
+  })
+
+  it('dirty 상태에서 변경을 버리면 draft를 폐기하고 다음 주로 이동한다', async () => {
+    const user = userEvent.setup()
+
+    renderWithQueryClient(<PlannerPage initialWeekStart="2026-05-18" />)
+
+    await user.click(
+      await screen.findByRole('button', {
+        name: '월요일 10:30 학습 블록 추가',
+      }),
+    )
+    await user.selectOptions(screen.getByLabelText('강의'), 'course-react')
+    await user.click(screen.getByRole('button', { name: '확인' }))
+    await user.click(screen.getByRole('button', { name: '다음 주로 이동' }))
+
+    const confirmDialog = screen.getByRole('alertdialog', {
+      name: '저장되지 않은 변경 사항이 있습니다',
+    })
+
+    await user.click(
+      within(confirmDialog).getByRole('button', {
+        name: '변경 버리고 이동',
+      }),
+    )
+
+    expect(
+      await screen.findByText('2026년 5월 25일 - 5월 31일'),
+    ).toBeInTheDocument()
+    expect(screen.getByText('이번 주 학습 블록이 없습니다.')).toBeInTheDocument()
+    expect(screen.queryByText('월요일 · 10:30 - 11:00')).not.toBeInTheDocument()
+    expect(screen.queryByText('저장되지 않은 변경 사항')).not.toBeInTheDocument()
+    expect(dispatchBeforeUnloadEvent().defaultPrevented).toBe(false)
   })
 
   it('빈 슬롯 클릭 시 기본 시간이 채워진 추가 모달을 연다', async () => {
@@ -198,6 +298,8 @@ describe('PlannerPage', () => {
     await user.click(saveButton)
 
     expect(screen.getByRole('button', { name: '저장 중...' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: '이전 주로 이동' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: '다음 주로 이동' })).toBeDisabled()
     expect(await screen.findByText('저장되었습니다.')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: '저장' })).toBeDisabled()
     expect(dispatchBeforeUnloadEvent().defaultPrevented).toBe(false)
