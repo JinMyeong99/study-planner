@@ -95,7 +95,6 @@ export const PlannerPage = ({ initialWeekStart }: PlannerPageProps) => {
     <main className="planner-page">
       <section className="planner-hero" aria-labelledby="planner-title">
         <div>
-          <span className="planner-hero__eyebrow">Weekly Study Planner</span>
           <h1 id="planner-title">주간 학습 플래너</h1>
           <p>{getWeekDateRangeLabel(weekStart)}</p>
         </div>
