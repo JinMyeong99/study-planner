@@ -24,8 +24,7 @@ describe('App', () => {
     renderWithQueryClient(<App />)
 
     expect(
-      screen.getByRole('heading', { name: '주간 학습 플래너' }),
+      await screen.findByRole('heading', { name: '주간 시간표' }),
     ).toBeInTheDocument()
-    expect(await screen.findByText('서버 상태:')).toBeInTheDocument()
   })
 })

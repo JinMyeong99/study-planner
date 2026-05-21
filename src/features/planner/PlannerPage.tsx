@@ -21,6 +21,7 @@ import {
 } from './utils/save'
 import { useEditablePlannerState } from './hooks/useEditablePlannerState'
 import { usePlannerData } from './hooks/usePlannerData'
+import { PlannerSummary } from './PlannerSummary'
 import { PlannerWeekGrid } from './PlannerWeekGrid'
 import type { Course, StudyBlock } from './types'
 import { plannerQueryKeys } from './queryKeys'
@@ -291,30 +292,6 @@ export const PlannerPage = ({ initialWeekStart }: PlannerPageProps) => {
 
   return (
     <main className="planner-page">
-      <section className="planner-hero" aria-labelledby="planner-title">
-        <div>
-          <h1 id="planner-title">주간 학습 플래너</h1>
-          <p>{getWeekDateRangeLabel(weekStart)}</p>
-        </div>
-        <div className="planner-status-panel" aria-label="플래너 상태">
-          <span>
-            서버 상태:{' '}
-            <strong>
-              {plannerData.isLoading
-                ? '불러오는 중'
-                : plannerData.isError
-                  ? '오류'
-                  : '로드 완료'}
-            </strong>
-          </span>
-          <span>
-            편집 상태:{' '}
-            <strong>
-              {editablePlanner.isDirty ? '저장되지 않은 변경 사항' : '변경 없음'}
-            </strong>
-          </span>
-        </div>
-      </section>
 
       {plannerData.isLoading ? (
         <section className="planner-message" role="status">
@@ -342,7 +319,7 @@ export const PlannerPage = ({ initialWeekStart }: PlannerPageProps) => {
           <section className="planner-panel" aria-labelledby="planner-grid-title">
             <div className="planner-panel__header">
               <h2 id="planner-grid-title">주간 시간표</h2>
-              <span>08:00 - 20:00 · 30분 단위</span>
+              <span>{getWeekDateRangeLabel(weekStart)}</span>
             </div>
             {conflictMessage ? (
               <p className="planner-conflict-alert" role="alert">
@@ -367,42 +344,50 @@ export const PlannerPage = ({ initialWeekStart }: PlannerPageProps) => {
                 })
               }}
             />
+            <div className="planner-grid-footer">
+              {editablePlanner.isDirty ? (
+                <span className="planner-dirty-indicator">저장되지 않은 변경 사항</span>
+              ) : null}
+              <button
+                className="planner-save-button"
+                disabled={!canSavePlanner}
+                onClick={handleSave}
+                type="button"
+              >
+                {saveMutation.isPending ? '저장 중...' : '저장'}
+              </button>
+            </div>
           </section>
 
-          <section
-            className="planner-panel"
-            aria-labelledby="planner-block-list-title"
-          >
-            <div className="planner-panel__header">
-              <h2 id="planner-block-list-title">편집 중 학습 블록</h2>
-              <span>{editablePlanner.draftBlocks.length}개</span>
-            </div>
-            <PlannerBlockList
+          <div className="planner-side">
+            <PlannerSummary
               blocks={editablePlanner.draftBlocks}
-              conflictBlockIds={conflictBlockIds}
               courses={plannerData.courses}
-              onBlockSelect={(block) => {
-                setModalState({
-                  block,
-                  mode: 'edit',
-                  initialValues: createFormValuesFromBlock(block),
-                })
-              }}
             />
-          </section>
+            <section
+              className="planner-panel"
+              aria-labelledby="planner-block-list-title"
+            >
+              <div className="planner-panel__header">
+                <h2 id="planner-block-list-title">이번 주 강의</h2>
+                <span>{editablePlanner.draftBlocks.length}개</span>
+              </div>
+              <PlannerBlockList
+                blocks={editablePlanner.draftBlocks}
+                conflictBlockIds={conflictBlockIds}
+                courses={plannerData.courses}
+                onBlockSelect={(block) => {
+                  setModalState({
+                    block,
+                    mode: 'edit',
+                    initialValues: createFormValuesFromBlock(block),
+                  })
+                }}
+              />
+            </section>
+          </div>
         </div>
       ) : null}
-
-      <div className="planner-save-footer">
-        <button
-          className="planner-save-button"
-          disabled={!canSavePlanner}
-          onClick={handleSave}
-          type="button"
-        >
-          {saveMutation.isPending ? '저장 중...' : '저장'}
-        </button>
-      </div>
 
       {saveFeedback ? (
         <div
