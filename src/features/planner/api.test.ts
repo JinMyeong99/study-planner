@@ -1,5 +1,7 @@
+import { http, HttpResponse } from 'msw'
 import { describe, expect, it } from 'vitest'
 
+import { server } from '../../mocks/server'
 import { getCourses, getPlanner, savePlanner } from './api'
 
 describe('planner API', () => {
@@ -110,5 +112,24 @@ describe('planner API', () => {
       code: 'TIME_CONFLICT',
       status: 409,
     })
+  })
+
+  it('JSON이 아닌 API 응답은 명확한 에러로 변환한다', async () => {
+    server.use(
+      http.get('/api/planner', () =>
+        new HttpResponse('<!doctype html><html lang="ko"></html>', {
+          headers: {
+            'Content-Type': 'text/html',
+          },
+        }),
+      ),
+    )
+
+    await expect(getPlanner('2099-01-04')).rejects.toThrow(
+      'API 응답이 JSON 형식이 아닙니다.',
+    )
+    await expect(getPlanner('2099-01-04')).rejects.not.toThrow(
+      "Unexpected token '<'",
+    )
   })
 })

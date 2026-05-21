@@ -42,13 +42,33 @@ const isErrorResponse = (value: unknown): value is ErrorResponse =>
   typeof value.code === 'string' &&
   typeof value.message === 'string'
 
+const isJsonContentType = (contentType: string | null) => {
+  const normalizedContentType = contentType?.toLowerCase() ?? ''
+
+  return (
+    normalizedContentType.includes('application/json') ||
+    normalizedContentType.includes('+json')
+  )
+}
+
+const readJsonResponse = async (response: Response) => {
+  if (!isJsonContentType(response.headers.get('content-type'))) {
+    const responsePreview = (await response.text()).trim().slice(0, 80)
+    const suffix = responsePreview ? ` 응답 시작: ${responsePreview}` : ''
+
+    throw new Error(`API 응답이 JSON 형식이 아닙니다.${suffix}`)
+  }
+
+  return (await response.json()) as unknown
+}
+
 const requestJson = async <T>(
   pathname: string,
   init?: RequestInit,
   searchParams?: Record<string, string>,
 ): Promise<T> => {
   const response = await fetch(createApiUrl(pathname, searchParams), init)
-  const data: unknown = await response.json()
+  const data = await readJsonResponse(response)
 
   if (!response.ok) {
     if (isErrorResponse(data)) {
