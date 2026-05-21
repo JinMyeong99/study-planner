@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { PlannerApiError, savePlanner } from './api'
@@ -173,6 +173,7 @@ const PlannerBlockList = ({
 export const PlannerPage = ({ initialWeekStart }: PlannerPageProps) => {
   const [modalState, setModalState] = useState<PlannerModalState | null>(null)
   const [saveFeedback, setSaveFeedback] = useState<SaveFeedback>(null)
+  const [isToastDismissing, setIsToastDismissing] = useState(false)
   const queryClient = useQueryClient()
   const defaultWeekStart = useMemo(() => getCurrentWeekStart(), [])
   const weekStart = initialWeekStart ?? defaultWeekStart
@@ -214,6 +215,18 @@ export const PlannerPage = ({ initialWeekStart }: PlannerPageProps) => {
       })
     },
   })
+  const dismissToast = () => {
+    setIsToastDismissing(true)
+    setTimeout(() => {
+      setSaveFeedback(null)
+      setIsToastDismissing(false)
+    }, 180)
+  }
+  useEffect(() => {
+    if (saveFeedback?.type !== 'success') return
+    const timer = setTimeout(dismissToast, 3000)
+    return () => clearTimeout(timer)
+  }, [saveFeedback])
   const canShowPlannerContent = isPlannerReady && editablePlanner.isReady
   const canSavePlanner =
     canShowPlannerContent && editablePlanner.isDirty && !saveMutation.isPending
@@ -381,16 +394,6 @@ export const PlannerPage = ({ initialWeekStart }: PlannerPageProps) => {
       ) : null}
 
       <div className="planner-save-footer">
-        {saveFeedback ? (
-          <span
-            className={`planner-save-status planner-save-status--${saveFeedback.type}`}
-            role={saveFeedback.type === 'error' ? 'alert' : 'status'}
-          >
-            {saveFeedback.message}
-          </span>
-        ) : (
-          <span className="planner-save-status" />
-        )}
         <button
           className="planner-save-button"
           disabled={!canSavePlanner}
@@ -400,6 +403,26 @@ export const PlannerPage = ({ initialWeekStart }: PlannerPageProps) => {
           {saveMutation.isPending ? '저장 중...' : '저장'}
         </button>
       </div>
+
+      {saveFeedback ? (
+        <div
+          className={`planner-toast planner-toast--${saveFeedback.type}${isToastDismissing ? ' is-dismissing' : ''}`}
+          role={saveFeedback.type === 'error' ? 'alert' : 'status'}
+        >
+          <em aria-hidden="true" className="planner-toast__icon">
+            {saveFeedback.type === 'success' ? '✓' : '!'}
+          </em>
+          <span className="planner-toast__message">{saveFeedback.message}</span>
+          <button
+            aria-label="닫기"
+            className="planner-toast__close"
+            onClick={dismissToast}
+            type="button"
+          >
+            ×
+          </button>
+        </div>
+      ) : null}
 
       {modalState ? (
         <PlannerBlockModal
