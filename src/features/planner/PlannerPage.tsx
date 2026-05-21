@@ -21,6 +21,7 @@ import {
 } from './utils/save'
 import { useEditablePlannerState } from './hooks/useEditablePlannerState'
 import { usePlannerData } from './hooks/usePlannerData'
+import { PlannerSummary } from './PlannerSummary'
 import { PlannerWeekGrid } from './PlannerWeekGrid'
 import type { Course, StudyBlock } from './types'
 import { plannerQueryKeys } from './queryKeys'
@@ -338,59 +339,65 @@ export const PlannerPage = ({ initialWeekStart }: PlannerPageProps) => {
       ) : null}
 
       {canShowPlannerContent ? (
-        <div className="planner-layout">
-          <section className="planner-panel" aria-labelledby="planner-grid-title">
-            <div className="planner-panel__header">
-              <h2 id="planner-grid-title">주간 시간표</h2>
-              <span>08:00 - 20:00 · 30분 단위</span>
-            </div>
-            {conflictMessage ? (
-              <p className="planner-conflict-alert" role="alert">
-                {conflictMessage}
-              </p>
-            ) : null}
-            <PlannerWeekGrid
-              blocks={editablePlanner.draftBlocks}
-              conflictBlockIds={conflictBlockIds}
-              courses={plannerData.courses}
-              onBlockClick={(block) => {
-                setModalState({
-                  block,
-                  mode: 'edit',
-                  initialValues: createFormValuesFromBlock(block),
-                })
-              }}
-              onSlotClick={(selection) => {
-                setModalState({
-                  mode: 'create',
-                  initialValues: createFormValuesFromSlot(selection),
-                })
-              }}
-            />
-          </section>
+        <>
+          <div className="planner-layout">
+            <section className="planner-panel" aria-labelledby="planner-grid-title">
+              <div className="planner-panel__header">
+                <h2 id="planner-grid-title">주간 시간표</h2>
+                <span>08:00 - 20:00 · 30분 단위</span>
+              </div>
+              {conflictMessage ? (
+                <p className="planner-conflict-alert" role="alert">
+                  {conflictMessage}
+                </p>
+              ) : null}
+              <PlannerWeekGrid
+                blocks={editablePlanner.draftBlocks}
+                conflictBlockIds={conflictBlockIds}
+                courses={plannerData.courses}
+                onBlockClick={(block) => {
+                  setModalState({
+                    block,
+                    mode: 'edit',
+                    initialValues: createFormValuesFromBlock(block),
+                  })
+                }}
+                onSlotClick={(selection) => {
+                  setModalState({
+                    mode: 'create',
+                    initialValues: createFormValuesFromSlot(selection),
+                  })
+                }}
+              />
+            </section>
 
-          <section
-            className="planner-panel"
-            aria-labelledby="planner-block-list-title"
-          >
-            <div className="planner-panel__header">
-              <h2 id="planner-block-list-title">편집 중 학습 블록</h2>
-              <span>{editablePlanner.draftBlocks.length}개</span>
-            </div>
-            <PlannerBlockList
-              blocks={editablePlanner.draftBlocks}
-              conflictBlockIds={conflictBlockIds}
-              courses={plannerData.courses}
-              onBlockSelect={(block) => {
-                setModalState({
-                  block,
-                  mode: 'edit',
-                  initialValues: createFormValuesFromBlock(block),
-                })
-              }}
-            />
-          </section>
-        </div>
+            <section
+              className="planner-panel"
+              aria-labelledby="planner-block-list-title"
+            >
+              <div className="planner-panel__header">
+                <h2 id="planner-block-list-title">편집 중 학습 블록</h2>
+                <span>{editablePlanner.draftBlocks.length}개</span>
+              </div>
+              <PlannerBlockList
+                blocks={editablePlanner.draftBlocks}
+                conflictBlockIds={conflictBlockIds}
+                courses={plannerData.courses}
+                onBlockSelect={(block) => {
+                  setModalState({
+                    block,
+                    mode: 'edit',
+                    initialValues: createFormValuesFromBlock(block),
+                  })
+                }}
+              />
+            </section>
+          </div>
+          <PlannerSummary
+            blocks={editablePlanner.draftBlocks}
+            courses={plannerData.courses}
+          />
+        </>
       ) : null}
 
       <div className="planner-save-footer">

@@ -196,6 +196,72 @@
   font-weight: 700;
 }
 
+.planner-summary {
+  max-width: 1180px;
+  margin: 20px auto 0;
+  padding: 22px;
+  border: 1px solid rgba(18, 27, 47, 0.08);
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.84);
+  box-shadow: 0 20px 60px rgba(32, 43, 68, 0.08);
+}
+
+.planner-summary__total {
+  color: #172033;
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.planner-summary__grid {
+  display: grid;
+  gap: 20px;
+}
+
+.planner-summary__label {
+  margin: 0 0 12px;
+  color: #526070;
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.planner-summary__list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.planner-summary__item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.planner-summary__dot {
+  flex-shrink: 0;
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+}
+
+.planner-summary__name {
+  flex: 1;
+  color: #344054;
+  font-size: 0.9rem;
+  font-weight: 600;
+  word-break: keep-all;
+}
+
+.planner-summary__duration {
+  color: #172033;
+  font-size: 0.9rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
 .planner-layout {
   display: grid;
   gap: 20px;
