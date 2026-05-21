@@ -35,6 +35,9 @@ const padDatePart = (value: number) => String(value).padStart(2, '0')
 const formatMonthDay = (date: Date) =>
   `${date.getMonth() + 1}월 ${date.getDate()}일`
 
+const formatShortMonthDay = (date: Date) =>
+  `${date.getMonth() + 1}/${date.getDate()}`
+
 export const parseLocalDate = (value: string) => {
   const match = DATE_PATTERN.exec(value)
 
@@ -59,6 +62,26 @@ export const formatLocalDate = (date: Date) => {
   const day = padDatePart(date.getDate())
 
   return `${year}-${month}-${day}`
+}
+
+export const addWeeksToLocalDate = (value: string, amount: number) => {
+  const date = parseLocalDate(value)
+
+  date.setDate(date.getDate() + amount * DAYS_IN_WEEK)
+
+  return formatLocalDate(date)
+}
+
+export const getWeekdayDateLabels = (weekStart: string) => {
+  const startDate = parseLocalDate(weekStart)
+
+  return PLANNER_WEEKDAY_LABELS.map((_, dayOffset) => {
+    const date = new Date(startDate)
+
+    date.setDate(startDate.getDate() + dayOffset)
+
+    return formatShortMonthDay(date)
+  })
 }
 
 export const getWeekStartDate = (date: Date) => {
