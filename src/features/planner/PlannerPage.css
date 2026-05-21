@@ -262,6 +262,10 @@
   white-space: nowrap;
 }
 
+.planner-summary__chart {
+  margin-bottom: 12px;
+}
+
 .planner-layout {
   display: grid;
   gap: 20px;
