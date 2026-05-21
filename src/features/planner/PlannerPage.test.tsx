@@ -52,6 +52,8 @@ describe('PlannerPage', () => {
     ).toBeInTheDocument()
     expect(screen.getByLabelText('월요일')).toBeInTheDocument()
     expect(screen.getByLabelText('일요일')).toBeInTheDocument()
+    expect(screen.getAllByLabelText('월요일 5/18').length).toBeGreaterThan(0)
+    expect(screen.getAllByLabelText('일요일 5/24').length).toBeGreaterThan(0)
     expect(screen.getByText('08:00')).toBeInTheDocument()
     expect(screen.getByText('12:00')).toBeInTheDocument()
     expect(screen.getByText('20:00')).toBeInTheDocument()
@@ -80,18 +82,18 @@ describe('PlannerPage', () => {
       name: '주간 시간 그리드',
     })
 
-    expect(screen.getByRole('tab', { name: '월' })).toHaveAttribute(
+    expect(screen.getByRole('tab', { name: '월요일 5/18' })).toHaveAttribute(
       'aria-selected',
       'true',
     )
 
-    await user.click(screen.getByRole('tab', { name: '수' }))
+    await user.click(screen.getByRole('tab', { name: '수요일 5/20' }))
 
-    expect(screen.getByRole('tab', { name: '월' })).toHaveAttribute(
+    expect(screen.getByRole('tab', { name: '월요일 5/18' })).toHaveAttribute(
       'aria-selected',
       'false',
     )
-    expect(screen.getByRole('tab', { name: '수' })).toHaveAttribute(
+    expect(screen.getByRole('tab', { name: '수요일 5/20' })).toHaveAttribute(
       'aria-selected',
       'true',
     )

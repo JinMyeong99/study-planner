@@ -332,6 +332,7 @@ export const PlannerPage = ({ initialWeekStart }: PlannerPageProps) => {
               blocks={editablePlanner.draftBlocks}
               conflictBlockIds={conflictBlockIds}
               courses={plannerData.courses}
+              weekStart={weekStart}
               onBlockClick={(block) => {
                 setModalState({
                   block,

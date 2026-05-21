@@ -342,10 +342,24 @@
 }
 
 .planner-week-grid__header strong {
+  display: grid;
+  gap: 3px;
   padding: 14px 10px;
   color: #344054;
   font-size: 0.92rem;
   text-align: center;
+}
+
+.planner-week-grid__day-label,
+.planner-week-grid__date-label {
+  display: block;
+  line-height: 1.2;
+}
+
+.planner-week-grid__date-label {
+  color: #98a2b3;
+  font-size: 0.72rem;
+  font-weight: 700;
 }
 
 .planner-week-grid__body {
@@ -800,8 +814,10 @@
   }
 
   .planner-week-grid__day-tab {
+    display: grid;
+    gap: 2px;
     min-width: 0;
-    padding: 9px 0;
+    padding: 8px 0;
     border: 1px solid rgba(18, 27, 47, 0.1);
     border-radius: 999px;
     background: #ffffff;
@@ -813,6 +829,10 @@
   .planner-week-grid__day-tab[aria-selected='true'] {
     border-color: rgba(74, 144, 217, 0.34);
     background: #eaf3ff;
+    color: #155c9f;
+  }
+
+  .planner-week-grid__day-tab[aria-selected='true'] .planner-week-grid__date-label {
     color: #155c9f;
   }
 
