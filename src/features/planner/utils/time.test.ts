@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import {
+  getNextPlannerSlotTime,
   isEndAfterStart,
   isThirtyMinuteStep,
   isValidPlannerTime,
@@ -40,5 +41,10 @@ describe('planner time utilities', () => {
     expect(isValidPlannerTimeRange('09:00', '10:30')).toBe(true)
     expect(isValidPlannerTimeRange('09:15', '10:00')).toBe(false)
     expect(isValidPlannerTimeRange('09:00', '09:00')).toBe(false)
+  })
+
+  it('다음 30분 슬롯 시간을 계산하되 종료 범위를 넘기지 않는다', () => {
+    expect(getNextPlannerSlotTime('10:30')).toBe('11:00')
+    expect(getNextPlannerSlotTime('19:30')).toBe('20:00')
   })
 })

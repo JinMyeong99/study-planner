@@ -103,6 +103,151 @@ describe('PlannerPage', () => {
     ).toBeInTheDocument()
   })
 
+  it('빈 슬롯 클릭 시 기본 시간이 채워진 추가 모달을 연다', async () => {
+    const user = userEvent.setup()
+
+    renderWithQueryClient(<PlannerPage initialWeekStart="2026-05-18" />)
+
+    await user.click(
+      await screen.findByRole('button', {
+        name: '월요일 10:30 학습 블록 추가',
+      }),
+    )
+
+    expect(
+      screen.getByRole('dialog', { name: '학습 블록 추가' }),
+    ).toBeInTheDocument()
+    expect(screen.getByLabelText('요일')).toHaveValue('0')
+    expect(screen.getByLabelText('시작 시간')).toHaveValue('10:30')
+    expect(screen.getByLabelText('종료 시간')).toHaveValue('11:00')
+  })
+
+  it('추가 모달 확인 시 draft 블록을 추가하고 dirty 상태가 된다', async () => {
+    const user = userEvent.setup()
+
+    renderWithQueryClient(<PlannerPage initialWeekStart="2026-05-18" />)
+
+    await user.click(
+      await screen.findByRole('button', {
+        name: '월요일 10:30 학습 블록 추가',
+      }),
+    )
+    await user.selectOptions(screen.getByLabelText('강의'), 'course-react')
+    await user.click(screen.getByRole('button', { name: '확인' }))
+
+    expect(screen.getByText('월요일 · 10:30 - 11:00')).toBeInTheDocument()
+    expect(screen.getByText('저장되지 않은 변경 사항')).toBeInTheDocument()
+    expect(
+      screen.queryByRole('dialog', { name: '학습 블록 추가' }),
+    ).not.toBeInTheDocument()
+  })
+
+  it('기존 블록 클릭 시 값을 수정한다', async () => {
+    const user = userEvent.setup()
+
+    renderWithQueryClient(<PlannerPage initialWeekStart="2026-05-18" />)
+
+    await user.click(
+      await screen.findByRole('button', {
+        name: 'React 상태 관리 09:00 - 10:30 편집',
+      }),
+    )
+
+    expect(
+      screen.getByRole('dialog', { name: '학습 블록 편집' }),
+    ).toBeInTheDocument()
+
+    await user.selectOptions(screen.getByLabelText('종료 시간'), '11:00')
+    await user.click(screen.getByRole('button', { name: '확인' }))
+
+    expect(screen.getByText('월요일 · 09:00 - 11:00')).toBeInTheDocument()
+    expect(screen.getByText('저장되지 않은 변경 사항')).toBeInTheDocument()
+  })
+
+  it('삭제 확인 후 draft 블록을 제거한다', async () => {
+    const user = userEvent.setup()
+
+    renderWithQueryClient(<PlannerPage initialWeekStart="2026-05-18" />)
+
+    await user.click(
+      await screen.findByRole('button', {
+        name: 'React 상태 관리 09:00 - 10:30 편집',
+      }),
+    )
+    await user.click(screen.getByRole('button', { name: '삭제' }))
+
+    expect(screen.getByText('이 학습 블록을 삭제할까요?')).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: '삭제 확정' }))
+
+    expect(screen.queryByText('월요일 · 09:00 - 10:30')).not.toBeInTheDocument()
+    expect(screen.getByText('저장되지 않은 변경 사항')).toBeInTheDocument()
+  })
+
+  it('종료 시간이 시작 시간보다 늦지 않으면 draft에 반영하지 않는다', async () => {
+    const user = userEvent.setup()
+
+    renderWithQueryClient(<PlannerPage initialWeekStart="2026-05-18" />)
+
+    await user.click(
+      await screen.findByRole('button', {
+        name: '월요일 10:30 학습 블록 추가',
+      }),
+    )
+    await user.selectOptions(screen.getByLabelText('강의'), 'course-react')
+    await user.selectOptions(screen.getByLabelText('종료 시간'), '10:30')
+    await user.click(screen.getByRole('button', { name: '확인' }))
+
+    expect(
+      screen.getByText('종료 시간은 시작 시간보다 늦어야 합니다.'),
+    ).toBeInTheDocument()
+    expect(screen.queryByText('월요일 · 10:30 - 10:30')).not.toBeInTheDocument()
+    expect(screen.getByText('변경 없음')).toBeInTheDocument()
+  })
+
+  it('겹치는 시간 블록이면 충돌 메시지를 보여주고 draft에 반영하지 않는다', async () => {
+    const user = userEvent.setup()
+
+    renderWithQueryClient(<PlannerPage initialWeekStart="2026-05-18" />)
+
+    await user.click(
+      await screen.findByRole('button', {
+        name: '월요일 09:30 학습 블록 추가',
+      }),
+    )
+    await user.selectOptions(screen.getByLabelText('강의'), 'course-typescript')
+    await user.click(screen.getByRole('button', { name: '확인' }))
+
+    expect(
+      screen.getByText(
+        'React 상태 관리(월요일 09:00 - 10:30)와 시간이 겹칩니다.',
+      ),
+    ).toBeInTheDocument()
+    expect(screen.queryByText('월요일 · 09:30 - 10:00')).not.toBeInTheDocument()
+    expect(screen.getByText('변경 없음')).toBeInTheDocument()
+  })
+
+  it('메모가 200자를 초과하면 draft에 반영하지 않는다', async () => {
+    const user = userEvent.setup()
+
+    renderWithQueryClient(<PlannerPage initialWeekStart="2026-05-18" />)
+
+    await user.click(
+      await screen.findByRole('button', {
+        name: '월요일 10:30 학습 블록 추가',
+      }),
+    )
+    await user.selectOptions(screen.getByLabelText('강의'), 'course-react')
+    await user.type(screen.getByLabelText('메모'), 'a'.repeat(201))
+    await user.click(screen.getByRole('button', { name: '확인' }))
+
+    expect(
+      screen.getByText('메모는 200자 이하로 입력해 주세요.'),
+    ).toBeInTheDocument()
+    expect(screen.queryByText('월요일 · 10:30 - 11:00')).not.toBeInTheDocument()
+    expect(screen.getByText('변경 없음')).toBeInTheDocument()
+  })
+
   it('플래너 조회 실패 시 에러와 재시도 버튼을 렌더링한다', async () => {
     server.use(
       http.get('/api/planner', () =>
