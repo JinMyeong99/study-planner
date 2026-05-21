@@ -33,3 +33,29 @@ button {
 #root {
   min-height: 100vh;
 }
+
+.startup-error {
+  display: grid;
+  align-content: center;
+  min-height: 100vh;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 48px 24px;
+}
+
+.startup-error strong {
+  color: #b42335;
+  font-size: 1.35rem;
+}
+
+.startup-error p {
+  color: #526070;
+  line-height: 1.7;
+}
+
+.startup-error code {
+  border-radius: 6px;
+  padding: 2px 6px;
+  background: #eef2f8;
+  color: #172033;
+}

@@ -17,6 +17,16 @@ export const parseTimeToMinutes = (time: string): number | null => {
   return Number(hours) * PLANNER_MINUTES_PER_HOUR + Number(minutes)
 }
 
+export const formatMinutesToTime = (minutes: number) => {
+  const hours = Math.floor(minutes / PLANNER_MINUTES_PER_HOUR)
+  const restMinutes = minutes % PLANNER_MINUTES_PER_HOUR
+
+  return `${String(hours).padStart(2, '0')}:${String(restMinutes).padStart(
+    2,
+    '0',
+  )}`
+}
+
 export const plannerStartMinutes = parseTimeToMinutes(PLANNER_START_TIME)!
 export const plannerEndMinutes = parseTimeToMinutes(PLANNER_END_TIME)!
 
@@ -62,3 +72,15 @@ export const isValidPlannerTimeRange = (
   isValidPlannerTime(startTime) &&
   isValidPlannerTime(endTime) &&
   isEndAfterStart(startTime, endTime)
+
+export const getNextPlannerSlotTime = (time: string) => {
+  const minutes = parseTimeToMinutes(time)
+
+  if (minutes === null) {
+    return time
+  }
+
+  return formatMinutesToTime(
+    Math.min(minutes + PLANNER_SLOT_MINUTES, plannerEndMinutes),
+  )
+}

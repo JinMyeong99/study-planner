@@ -6,6 +6,7 @@ import {
   createPlannerTimeSlots,
   getBlockDurationMinutes,
   getBlockGridPlacement,
+  PLANNER_GRID_SLOT_HEIGHT,
 } from './grid'
 
 const createStudyBlock = (
@@ -43,10 +44,24 @@ describe('planner grid utilities', () => {
     )
   })
 
-  it('블록의 시작 위치와 높이를 전체 그리드 비율로 계산한다', () => {
+  it('블록의 시작 위치와 높이를 30분 슬롯 높이 기준 px 값으로 계산한다', () => {
     const placement = getBlockGridPlacement(createStudyBlock('09:00', '10:30'))
 
-    expect(placement.top).toBeCloseTo((60 / 720) * 100)
-    expect(placement.height).toBeCloseTo((90 / 720) * 100)
+    expect(placement.top).toBe(2 * PLANNER_GRID_SLOT_HEIGHT)
+    expect(placement.height).toBe(3 * PLANNER_GRID_SLOT_HEIGHT)
+    expect(placement.durationMinutes).toBe(90)
+  })
+
+  it('늦은 시간대 블록도 누적 오차 없이 슬롯 위치로 계산한다', () => {
+    expect(getBlockGridPlacement(createStudyBlock('13:00', '13:30'))).toEqual({
+      durationMinutes: 30,
+      height: 1 * PLANNER_GRID_SLOT_HEIGHT,
+      top: 10 * PLANNER_GRID_SLOT_HEIGHT,
+    })
+    expect(getBlockGridPlacement(createStudyBlock('16:00', '17:30'))).toEqual({
+      durationMinutes: 90,
+      height: 3 * PLANNER_GRID_SLOT_HEIGHT,
+      top: 16 * PLANNER_GRID_SLOT_HEIGHT,
+    })
   })
 })

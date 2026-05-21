@@ -1,5 +1,6 @@
 import type { StudyBlock } from '../types'
 import {
+  formatMinutesToTime,
   parseTimeToMinutes,
   plannerEndMinutes,
   plannerStartMinutes,
@@ -7,16 +8,7 @@ import {
   PLANNER_SLOT_MINUTES,
 } from './time'
 
-const formatMinutesToTime = (minutes: number) => {
-  const hours = Math.floor(minutes / PLANNER_MINUTES_PER_HOUR)
-  const restMinutes = minutes % PLANNER_MINUTES_PER_HOUR
-
-  return `${String(hours).padStart(2, '0')}:${String(restMinutes).padStart(
-    2,
-    '0',
-  )}`
-}
-
+export const PLANNER_GRID_SLOT_HEIGHT = 42
 export const plannerTotalMinutes = plannerEndMinutes - plannerStartMinutes
 
 export const createPlannerTimeSlots = () => {
@@ -67,7 +59,12 @@ export const getBlockGridPlacement = (block: StudyBlock) => {
   }
 
   return {
-    top: ((startMinutes - plannerStartMinutes) / plannerTotalMinutes) * 100,
-    height: ((endMinutes - startMinutes) / plannerTotalMinutes) * 100,
+    durationMinutes: endMinutes - startMinutes,
+    height:
+      ((endMinutes - startMinutes) / PLANNER_SLOT_MINUTES) *
+      PLANNER_GRID_SLOT_HEIGHT,
+    top:
+      ((startMinutes - plannerStartMinutes) / PLANNER_SLOT_MINUTES) *
+      PLANNER_GRID_SLOT_HEIGHT,
   }
 }

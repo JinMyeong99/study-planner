@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import type { SetStateAction } from 'react'
 
 import type { StudyBlock } from '../types'
 
@@ -13,7 +12,9 @@ export interface EditablePlannerState {
   draftBlocks: StudyBlock[]
   isDirty: boolean
   isReady: boolean
-  setDraftBlocks: (nextBlocks: SetStateAction<StudyBlock[]>) => void
+  addDraftBlock: (block: Omit<StudyBlock, 'id'>) => StudyBlock
+  updateDraftBlock: (block: StudyBlock) => void
+  deleteDraftBlock: (blockId: string) => void
   resetDraft: () => void
 }
 
@@ -48,6 +49,8 @@ const serializePlannerBlocks = (blocks: StudyBlock[]) =>
       ),
   )
 
+const createDraftBlockId = () => `draft-${globalThis.crypto.randomUUID()}`
+
 export const useEditablePlannerState = ({
   weekStart,
   savedBlocks,
@@ -58,22 +61,47 @@ export const useEditablePlannerState = ({
   const activeDraftBlocks =
     draftOverride?.weekStart === weekStart ? draftOverride.blocks : savedBlocks
 
-  const setDraftBlocks = (nextBlocks: SetStateAction<StudyBlock[]>) => {
+  const replaceDraftBlocks = (
+    resolveNextBlocks: (currentBlocks: StudyBlock[]) => StudyBlock[],
+  ) => {
     setDraftOverride((currentOverride) => {
       const currentDraftBlocks =
         currentOverride?.weekStart === weekStart
           ? currentOverride.blocks
           : savedBlocks
-      const resolvedBlocks =
-        typeof nextBlocks === 'function'
-          ? nextBlocks(clonePlannerBlocks(currentDraftBlocks))
-          : nextBlocks
 
       return {
         weekStart,
-        blocks: clonePlannerBlocks(resolvedBlocks),
+        blocks: clonePlannerBlocks(
+          resolveNextBlocks(clonePlannerBlocks(currentDraftBlocks)),
+        ),
       }
     })
+  }
+
+  const addDraftBlock = (block: Omit<StudyBlock, 'id'>) => {
+    const nextBlock = {
+      ...block,
+      id: createDraftBlockId(),
+    }
+
+    replaceDraftBlocks((currentBlocks) => [...currentBlocks, nextBlock])
+
+    return nextBlock
+  }
+
+  const updateDraftBlock = (block: StudyBlock) => {
+    replaceDraftBlocks((currentBlocks) =>
+      currentBlocks.map((currentBlock) =>
+        currentBlock.id === block.id ? block : currentBlock,
+      ),
+    )
+  }
+
+  const deleteDraftBlock = (blockId: string) => {
+    replaceDraftBlocks((currentBlocks) =>
+      currentBlocks.filter((block) => block.id !== blockId),
+    )
   }
 
   const resetDraft = () => {
@@ -90,7 +118,9 @@ export const useEditablePlannerState = ({
     draftBlocks: clonePlannerBlocks(activeDraftBlocks),
     isDirty,
     isReady,
-    setDraftBlocks,
+    addDraftBlock,
+    updateDraftBlock,
+    deleteDraftBlock,
     resetDraft,
   }
 }

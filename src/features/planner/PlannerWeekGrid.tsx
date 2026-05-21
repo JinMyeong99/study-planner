@@ -6,16 +6,21 @@ import {
   createPlannerHourLabels,
   createPlannerTimeSlots,
   getBlockGridPlacement,
+  PLANNER_GRID_SLOT_HEIGHT,
 } from './utils/grid'
 
 interface PlannerWeekGridProps {
   blocks: StudyBlock[]
   courses: Course[]
+  onBlockClick: (block: StudyBlock) => void
+  onSlotClick: (selection: { dayOfWeek: number; startTime: string }) => void
 }
 
 const timeSlots = createPlannerTimeSlots()
 const hourLabels = createPlannerHourLabels()
 const gridStyle = {
+  '--planner-grid-height': `${timeSlots.length * PLANNER_GRID_SLOT_HEIGHT}px`,
+  '--planner-slot-height': `${PLANNER_GRID_SLOT_HEIGHT}px`,
   '--planner-slot-count': timeSlots.length,
 } as CSSProperties
 
@@ -29,9 +34,21 @@ const getBlocksByDay = (blocks: StudyBlock[]) =>
     blocks.filter((block) => block.dayOfWeek === dayOfWeek),
   )
 
+const getBlockClassName = (durationMinutes: number, hasMemo: boolean) =>
+  [
+    'planner-week-grid__block',
+    durationMinutes <= 30 ? 'is-compact' : '',
+    durationMinutes >= 60 && hasMemo ? 'has-memo-preview' : '',
+    durationMinutes >= 90 && hasMemo ? 'has-large-memo-preview' : '',
+  ]
+    .filter(Boolean)
+    .join(' ')
+
 export const PlannerWeekGrid = ({
   blocks,
   courses,
+  onBlockClick,
+  onSlotClick,
 }: PlannerWeekGridProps) => {
   const [selectedDayOfWeek, setSelectedDayOfWeek] = useState(0)
   const courseMap = createCourseMap(courses)
@@ -85,8 +102,15 @@ export const PlannerWeekGrid = ({
         style={gridStyle}
       >
         <div className="planner-week-grid__time-axis" aria-hidden="true">
-          {hourLabels.map((label) => (
-            <span key={label}>{label}</span>
+          {hourLabels.map((label, index) => (
+            <span
+              key={label}
+              style={{
+                top: `${index * PLANNER_GRID_SLOT_HEIGHT * 2}px`,
+              }}
+            >
+              {label}
+            </span>
           ))}
         </div>
 
@@ -101,10 +125,17 @@ export const PlannerWeekGrid = ({
             aria-label={`${weekday}요일`}
           >
             {timeSlots.map((slot) => (
-              <span
-                aria-hidden="true"
+              <button
+                aria-label={`${weekday}요일 ${slot} 학습 블록 추가`}
                 className="planner-week-grid__slot"
                 key={slot}
+                onClick={() => {
+                  onSlotClick({
+                    dayOfWeek,
+                    startTime: slot,
+                  })
+                }}
+                type="button"
               />
             ))}
             {blocksByDay[dayOfWeek].map((block) => {
@@ -115,21 +146,33 @@ export const PlannerWeekGrid = ({
                 '--planner-block-bg': getCourseBackground(
                   course?.color ?? '#8f97a8',
                 ),
-                height: `${placement.height}%`,
-                top: `${placement.top}%`,
+                height: `${placement.height}px`,
+                top: `${placement.top}px`,
               } as CSSProperties
+              const courseTitle = course?.title ?? '알 수 없는 강의'
 
               return (
-                <article
-                  className="planner-week-grid__block"
+                <button
+                  aria-label={`${courseTitle} ${block.startTime} - ${block.endTime} 편집`}
+                  className={getBlockClassName(
+                    placement.durationMinutes,
+                    Boolean(block.memo),
+                  )}
                   key={block.id}
+                  onClick={() => {
+                    onBlockClick(block)
+                  }}
                   style={blockStyle}
+                  type="button"
                 >
-                  <strong>{course?.title ?? '알 수 없는 강의'}</strong>
+                  <strong>{courseTitle}</strong>
                   <span>
                     {block.startTime} - {block.endTime}
                   </span>
-                </article>
+                  {block.memo && placement.durationMinutes >= 60 ? (
+                    <p>{block.memo}</p>
+                  ) : null}
+                </button>
               )
             })}
           </div>
