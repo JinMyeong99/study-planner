@@ -1,4 +1,4 @@
-import { useState, type CSSProperties } from 'react'
+import { useState, useMemo, type CSSProperties } from 'react'
 
 import type { Course, StudyBlock } from './types'
 import { getWeekdayDateLabels, PLANNER_WEEKDAY_LABELS } from './utils/date'
@@ -55,9 +55,9 @@ export const PlannerWeekGrid = ({
   weekStart,
 }: PlannerWeekGridProps) => {
   const [selectedDayOfWeek, setSelectedDayOfWeek] = useState(0)
-  const courseMap = createCourseMap(courses)
-  const blocksByDay = getBlocksByDay(blocks)
-  const weekdayDateLabels = getWeekdayDateLabels(weekStart)
+  const courseMap = useMemo(() => createCourseMap(courses), [courses])
+  const blocksByDay = useMemo(() => getBlocksByDay(blocks), [blocks])
+  const weekdayDateLabels = useMemo(() => getWeekdayDateLabels(weekStart), [weekStart])
 
   return (
     <div
