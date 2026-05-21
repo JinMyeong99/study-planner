@@ -466,6 +466,10 @@
   border-bottom-color: rgba(18, 27, 47, 0.12);
 }
 
+.planner-week-grid__slot:last-child {
+  border-bottom: 0;
+}
+
 .planner-week-grid__slot:hover,
 .planner-week-grid__slot:focus-visible {
   background: rgba(74, 144, 217, 0.08);
