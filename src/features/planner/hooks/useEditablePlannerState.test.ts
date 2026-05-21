@@ -30,12 +30,18 @@ const serverBlock: StudyBlock = {
 
 describe('useEditablePlannerState', () => {
   it('서버 blocks가 준비되면 draft를 같은 값으로 초기화한다', async () => {
-    const { result } = renderHook(() =>
-      useEditablePlannerState({
-        weekStart: '2026-05-18',
-        savedBlocks: [savedBlock],
-        isReady: true,
-      }),
+    const { result } = renderHook(
+      ({ savedBlocks }) =>
+        useEditablePlannerState({
+          weekStart: '2026-05-18',
+          savedBlocks,
+          isReady: true,
+        }),
+      {
+        initialProps: {
+          savedBlocks: [savedBlock],
+        },
+      },
     )
 
     await waitFor(() => expect(result.current.isReady).toBe(true))
@@ -46,12 +52,18 @@ describe('useEditablePlannerState', () => {
   })
 
   it('draft가 서버 blocks와 달라지면 dirty 상태가 된다', async () => {
-    const { result } = renderHook(() =>
-      useEditablePlannerState({
-        weekStart: '2026-05-18',
-        savedBlocks: [savedBlock],
-        isReady: true,
-      }),
+    const { result } = renderHook(
+      ({ savedBlocks }) =>
+        useEditablePlannerState({
+          weekStart: '2026-05-18',
+          savedBlocks,
+          isReady: true,
+        }),
+      {
+        initialProps: {
+          savedBlocks: [savedBlock],
+        },
+      },
     )
 
     await waitFor(() => expect(result.current.isReady).toBe(true))
@@ -65,12 +77,18 @@ describe('useEditablePlannerState', () => {
   })
 
   it('resetDraft를 호출하면 서버 기준 상태로 돌아간다', async () => {
-    const { result } = renderHook(() =>
-      useEditablePlannerState({
-        weekStart: '2026-05-18',
-        savedBlocks: [savedBlock],
-        isReady: true,
-      }),
+    const { result } = renderHook(
+      ({ savedBlocks }) =>
+        useEditablePlannerState({
+          weekStart: '2026-05-18',
+          savedBlocks,
+          isReady: true,
+        }),
+      {
+        initialProps: {
+          savedBlocks: [savedBlock],
+        },
+      },
     )
 
     await waitFor(() => expect(result.current.isReady).toBe(true))

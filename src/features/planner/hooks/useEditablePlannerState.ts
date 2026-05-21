@@ -1,12 +1,11 @@
-import { useEffect, useRef, useState } from 'react'
+import { useState } from 'react'
 import type { SetStateAction } from 'react'
 
 import type { StudyBlock } from '../types'
 
-interface EditablePlannerStateSnapshot {
-  weekStart: string | null
-  savedBlocks: StudyBlock[]
-  draftBlocks: StudyBlock[]
+interface DraftBlocksOverride {
+  weekStart: string
+  blocks: StudyBlock[]
 }
 
 export interface EditablePlannerState {
@@ -49,81 +48,48 @@ const serializePlannerBlocks = (blocks: StudyBlock[]) =>
       ),
   )
 
-const createInitialState = (): EditablePlannerStateSnapshot => ({
-  weekStart: null,
-  savedBlocks: [],
-  draftBlocks: [],
-})
-
 export const useEditablePlannerState = ({
   weekStart,
   savedBlocks,
   isReady,
 }: UseEditablePlannerStateParams): EditablePlannerState => {
-  const [state, setState] =
-    useState<EditablePlannerStateSnapshot>(createInitialState)
-  const savedBlocksRef = useRef(savedBlocks)
-  const savedBlocksKey = serializePlannerBlocks(savedBlocks)
-
-  savedBlocksRef.current = savedBlocks
-
-  useEffect(() => {
-    if (!isReady) {
-      return
-    }
-
-    setState((currentState) => {
-      const nextSavedBlocks = clonePlannerBlocks(savedBlocksRef.current)
-      const isWeekChanged = currentState.weekStart !== weekStart
-      const isCurrentDirty =
-        serializePlannerBlocks(currentState.draftBlocks) !==
-        serializePlannerBlocks(currentState.savedBlocks)
-
-      if (isWeekChanged || !isCurrentDirty) {
-        return {
-          weekStart,
-          savedBlocks: nextSavedBlocks,
-          draftBlocks: clonePlannerBlocks(nextSavedBlocks),
-        }
-      }
-
-      return {
-        ...currentState,
-        savedBlocks: nextSavedBlocks,
-      }
-    })
-  }, [isReady, savedBlocksKey, weekStart])
+  const [draftOverride, setDraftOverride] =
+    useState<DraftBlocksOverride | null>(null)
+  const activeDraftBlocks =
+    draftOverride?.weekStart === weekStart ? draftOverride.blocks : savedBlocks
 
   const setDraftBlocks = (nextBlocks: SetStateAction<StudyBlock[]>) => {
-    setState((currentState) => {
+    setDraftOverride((currentOverride) => {
+      const currentDraftBlocks =
+        currentOverride?.weekStart === weekStart
+          ? currentOverride.blocks
+          : savedBlocks
       const resolvedBlocks =
         typeof nextBlocks === 'function'
-          ? nextBlocks(currentState.draftBlocks)
+          ? nextBlocks(clonePlannerBlocks(currentDraftBlocks))
           : nextBlocks
 
       return {
-        ...currentState,
-        draftBlocks: clonePlannerBlocks(resolvedBlocks),
+        weekStart,
+        blocks: clonePlannerBlocks(resolvedBlocks),
       }
     })
   }
 
   const resetDraft = () => {
-    setState((currentState) => ({
-      ...currentState,
-      draftBlocks: clonePlannerBlocks(currentState.savedBlocks),
-    }))
+    setDraftOverride((currentOverride) =>
+      currentOverride?.weekStart === weekStart ? null : currentOverride,
+    )
   }
 
   const isDirty =
-    serializePlannerBlocks(state.draftBlocks) !==
-    serializePlannerBlocks(state.savedBlocks)
+    serializePlannerBlocks(activeDraftBlocks) !== serializePlannerBlocks(savedBlocks)
 
   return {
-    savedBlocks: state.savedBlocks,
-    draftBlocks: state.draftBlocks,
+    savedBlocks: clonePlannerBlocks(savedBlocks),
+    draftBlocks: clonePlannerBlocks(activeDraftBlocks),
     isDirty,
-    isReady: isReady && state.weekStart === weekStart,
+    isReady,
     setDraftBlocks,
     resetDraft,
   }
