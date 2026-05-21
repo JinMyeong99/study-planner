@@ -162,10 +162,9 @@
 }
 
 .planner-week-grid__body {
-  --planner-slot-height: 42px;
   display: grid;
   grid-template-columns: 52px repeat(7, minmax(0, 1fr));
-  min-height: calc(var(--planner-slot-count) * var(--planner-slot-height));
+  height: var(--planner-grid-height);
   border: 1px solid rgba(18, 27, 47, 0.08);
   border-radius: 0 0 18px 18px;
   background: #ffffff;
@@ -173,15 +172,15 @@
 
 .planner-week-grid__time-axis {
   position: relative;
-  display: grid;
-  grid-template-rows: repeat(12, calc(var(--planner-slot-height) * 2));
+  height: var(--planner-grid-height);
   border-right: 1px solid rgba(18, 27, 47, 0.08);
   background: #f8fafc;
 }
 
 .planner-week-grid__time-axis span {
-  position: relative;
-  top: -0.5em;
+  position: absolute;
+  right: 0;
+  transform: translateY(-50%);
   padding-right: 10px;
   color: #98a2b3;
   font-size: 0.78rem;
@@ -189,7 +188,7 @@
 }
 
 .planner-week-grid__time-axis span:first-child {
-  top: 10px;
+  transform: translateY(10px);
 }
 
 .planner-week-grid__day-column {
@@ -265,6 +264,38 @@
   font-size: 0.72rem;
   font-weight: 700;
   white-space: nowrap;
+}
+
+.planner-week-grid__block p {
+  display: -webkit-box;
+  overflow: hidden;
+  margin: 0;
+  color: #667085;
+  font-size: 0.72rem;
+  line-height: 1.35;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+}
+
+.planner-week-grid__block.has-large-memo-preview p {
+  -webkit-line-clamp: 2;
+}
+
+.planner-week-grid__block.is-compact {
+  gap: 2px;
+  padding: 6px 8px 6px 9px;
+}
+
+.planner-week-grid__block.is-compact strong {
+  overflow: hidden;
+  font-size: 0.78rem;
+  line-height: 1.1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.planner-week-grid__block.is-compact span {
+  font-size: 0.68rem;
 }
 
 .planner-block-list {

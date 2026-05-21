@@ -6,6 +6,7 @@ import {
   createPlannerHourLabels,
   createPlannerTimeSlots,
   getBlockGridPlacement,
+  PLANNER_GRID_SLOT_HEIGHT,
 } from './utils/grid'
 
 interface PlannerWeekGridProps {
@@ -18,6 +19,8 @@ interface PlannerWeekGridProps {
 const timeSlots = createPlannerTimeSlots()
 const hourLabels = createPlannerHourLabels()
 const gridStyle = {
+  '--planner-grid-height': `${timeSlots.length * PLANNER_GRID_SLOT_HEIGHT}px`,
+  '--planner-slot-height': `${PLANNER_GRID_SLOT_HEIGHT}px`,
   '--planner-slot-count': timeSlots.length,
 } as CSSProperties
 
@@ -30,6 +33,16 @@ const getBlocksByDay = (blocks: StudyBlock[]) =>
   PLANNER_WEEKDAY_LABELS.map((_, dayOfWeek) =>
     blocks.filter((block) => block.dayOfWeek === dayOfWeek),
   )
+
+const getBlockClassName = (durationMinutes: number, hasMemo: boolean) =>
+  [
+    'planner-week-grid__block',
+    durationMinutes <= 30 ? 'is-compact' : '',
+    durationMinutes >= 60 && hasMemo ? 'has-memo-preview' : '',
+    durationMinutes >= 90 && hasMemo ? 'has-large-memo-preview' : '',
+  ]
+    .filter(Boolean)
+    .join(' ')
 
 export const PlannerWeekGrid = ({
   blocks,
@@ -89,8 +102,15 @@ export const PlannerWeekGrid = ({
         style={gridStyle}
       >
         <div className="planner-week-grid__time-axis" aria-hidden="true">
-          {hourLabels.map((label) => (
-            <span key={label}>{label}</span>
+          {hourLabels.map((label, index) => (
+            <span
+              key={label}
+              style={{
+                top: `${index * PLANNER_GRID_SLOT_HEIGHT * 2}px`,
+              }}
+            >
+              {label}
+            </span>
           ))}
         </div>
 
@@ -126,15 +146,18 @@ export const PlannerWeekGrid = ({
                 '--planner-block-bg': getCourseBackground(
                   course?.color ?? '#8f97a8',
                 ),
-                height: `${placement.height}%`,
-                top: `${placement.top}%`,
+                height: `${placement.height}px`,
+                top: `${placement.top}px`,
               } as CSSProperties
               const courseTitle = course?.title ?? '알 수 없는 강의'
 
               return (
                 <button
                   aria-label={`${courseTitle} ${block.startTime} - ${block.endTime} 편집`}
-                  className="planner-week-grid__block"
+                  className={getBlockClassName(
+                    placement.durationMinutes,
+                    Boolean(block.memo),
+                  )}
                   key={block.id}
                   onClick={() => {
                     onBlockClick(block)
@@ -146,6 +169,9 @@ export const PlannerWeekGrid = ({
                   <span>
                     {block.startTime} - {block.endTime}
                   </span>
+                  {block.memo && placement.durationMinutes >= 60 ? (
+                    <p>{block.memo}</p>
+                  ) : null}
                 </button>
               )
             })}

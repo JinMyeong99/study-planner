@@ -58,11 +58,9 @@ describe('PlannerPage', () => {
 
     expect(within(grid).getByText('React 상태 관리')).toBeInTheDocument()
     expect(within(grid).getByText('09:00 - 10:30')).toBeInTheDocument()
+    expect(within(grid).getByText('상태와 서버 상태 분리 복습')).toBeInTheDocument()
     expect(within(grid).getByText('TypeScript 기초')).toBeInTheDocument()
     expect(within(grid).getByText('14:00 - 16:00')).toBeInTheDocument()
-    expect(
-      within(grid).queryByText('상태와 서버 상태 분리 복습'),
-    ).not.toBeInTheDocument()
   })
 
   it('모바일 요일 전환을 위한 요일 탭 상태를 변경한다', async () => {
@@ -140,6 +138,33 @@ describe('PlannerPage', () => {
     expect(
       screen.queryByRole('dialog', { name: '학습 블록 추가' }),
     ).not.toBeInTheDocument()
+  })
+
+  it('30분 블록은 compact 표시를 적용하고 그리드 메모를 숨긴다', async () => {
+    const user = userEvent.setup()
+
+    renderWithQueryClient(<PlannerPage initialWeekStart="2026-05-18" />)
+
+    await user.click(
+      await screen.findByRole('button', {
+        name: '월요일 10:30 학습 블록 추가',
+      }),
+    )
+    await user.selectOptions(screen.getByLabelText('강의'), 'course-react')
+    await user.type(screen.getByLabelText('메모'), '30분 블록 메모')
+    await user.click(screen.getByRole('button', { name: '확인' }))
+
+    const gridBlock = screen.getByRole('button', {
+      name: 'React 상태 관리 10:30 - 11:00 편집',
+    })
+
+    expect(gridBlock).toHaveClass('is-compact')
+    expect(
+      within(
+        screen.getByRole('region', { name: '주간 시간 그리드' }),
+      ).queryByText('30분 블록 메모'),
+    ).not.toBeInTheDocument()
+    expect(screen.getByText('30분 블록 메모')).toBeInTheDocument()
   })
 
   it('기존 블록 클릭 시 값을 수정한다', async () => {

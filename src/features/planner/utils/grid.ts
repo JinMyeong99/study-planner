@@ -8,6 +8,7 @@ import {
   PLANNER_SLOT_MINUTES,
 } from './time'
 
+export const PLANNER_GRID_SLOT_HEIGHT = 42
 export const plannerTotalMinutes = plannerEndMinutes - plannerStartMinutes
 
 export const createPlannerTimeSlots = () => {
@@ -58,7 +59,12 @@ export const getBlockGridPlacement = (block: StudyBlock) => {
   }
 
   return {
-    top: ((startMinutes - plannerStartMinutes) / plannerTotalMinutes) * 100,
-    height: ((endMinutes - startMinutes) / plannerTotalMinutes) * 100,
+    durationMinutes: endMinutes - startMinutes,
+    height:
+      ((endMinutes - startMinutes) / PLANNER_SLOT_MINUTES) *
+      PLANNER_GRID_SLOT_HEIGHT,
+    top:
+      ((startMinutes - plannerStartMinutes) / PLANNER_SLOT_MINUTES) *
+      PLANNER_GRID_SLOT_HEIGHT,
   }
 }
