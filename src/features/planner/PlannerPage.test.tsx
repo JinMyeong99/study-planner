@@ -112,9 +112,11 @@ describe('PlannerPage', () => {
       }),
     )
 
-    expect(
-      screen.getByRole('dialog', { name: '학습 블록 추가' }),
-    ).toBeInTheDocument()
+    expect(screen.getByRole('dialog')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '모달 닫기' })).toHaveTextContent(
+      '×',
+    )
+    expect(screen.queryByText('로컬 편집')).not.toBeInTheDocument()
     expect(screen.getByLabelText('요일')).toHaveValue('0')
     expect(screen.getByLabelText('시작 시간')).toHaveValue('10:30')
     expect(screen.getByLabelText('종료 시간')).toHaveValue('11:00')
@@ -135,9 +137,7 @@ describe('PlannerPage', () => {
 
     expect(screen.getByText('월요일 · 10:30 - 11:00')).toBeInTheDocument()
     expect(screen.getByText('저장되지 않은 변경 사항')).toBeInTheDocument()
-    expect(
-      screen.queryByRole('dialog', { name: '학습 블록 추가' }),
-    ).not.toBeInTheDocument()
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
   })
 
   it('30분 블록은 compact 표시를 적용하고 그리드 메모를 숨긴다', async () => {
@@ -178,9 +178,8 @@ describe('PlannerPage', () => {
       }),
     )
 
-    expect(
-      screen.getByRole('dialog', { name: '학습 블록 편집' }),
-    ).toBeInTheDocument()
+    expect(screen.getByRole('dialog')).toBeInTheDocument()
+    expect(screen.queryByText('학습 블록 편집')).not.toBeInTheDocument()
 
     await user.selectOptions(screen.getByLabelText('종료 시간'), '11:00')
     await user.click(screen.getByRole('button', { name: '확인' }))
@@ -189,7 +188,7 @@ describe('PlannerPage', () => {
     expect(screen.getByText('저장되지 않은 변경 사항')).toBeInTheDocument()
   })
 
-  it('삭제 확인 후 draft 블록을 제거한다', async () => {
+  it('삭제 버튼 클릭 한 번으로 draft 블록을 제거한다', async () => {
     const user = userEvent.setup()
 
     renderWithQueryClient(<PlannerPage initialWeekStart="2026-05-18" />)
@@ -201,11 +200,14 @@ describe('PlannerPage', () => {
     )
     await user.click(screen.getByRole('button', { name: '삭제' }))
 
-    expect(screen.getByText('이 학습 블록을 삭제할까요?')).toBeInTheDocument()
-
-    await user.click(screen.getByRole('button', { name: '삭제 확정' }))
-
     expect(screen.queryByText('월요일 · 09:00 - 10:30')).not.toBeInTheDocument()
+    expect(screen.queryByText('이 학습 블록을 삭제할까요?')).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: '삭제 취소' }),
+    ).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: '삭제 확정' }),
+    ).not.toBeInTheDocument()
     expect(screen.getByText('저장되지 않은 변경 사항')).toBeInTheDocument()
   })
 

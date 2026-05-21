@@ -361,7 +361,7 @@
   width: min(100%, 560px);
   max-height: calc(100vh - 48px);
   overflow: auto;
-  padding: 24px;
+  padding: 18px 24px 24px;
   border: 1px solid rgba(18, 27, 47, 0.08);
   border-radius: 28px;
   background: #ffffff;
@@ -376,21 +376,7 @@
 
 .planner-modal__header {
   display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 16px;
-}
-
-.planner-modal__header strong {
-  color: #4a90d9;
-  font-size: 0.78rem;
-  letter-spacing: 0.08em;
-}
-
-.planner-modal__header h2 {
-  margin: 4px 0 0;
-  color: #172033;
-  font-size: 1.45rem;
+  justify-content: flex-end;
 }
 
 .planner-modal__close,
@@ -403,9 +389,21 @@
 }
 
 .planner-modal__close {
-  padding: 8px 12px;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
   background: #f2f4f7;
   color: #526070;
+  font-size: 1.35rem;
+  line-height: 1;
+}
+
+.planner-modal__close:hover,
+.planner-modal__close:focus-visible {
+  background: #e4ebf4;
+  color: #172033;
 }
 
 .planner-modal label {
@@ -420,9 +418,30 @@
   width: 100%;
   border: 1px solid rgba(18, 27, 47, 0.12);
   border-radius: 16px;
-  padding: 12px 14px;
   background: #ffffff;
   color: #172033;
+}
+
+.planner-modal select {
+  appearance: none;
+  padding: 12px 42px 12px 14px;
+  background:
+    linear-gradient(45deg, transparent 50%, #667085 50%) right 18px center /
+      6px 6px no-repeat,
+    linear-gradient(135deg, #667085 50%, transparent 50%) right 13px center /
+      6px 6px no-repeat,
+    #ffffff;
+}
+
+.planner-modal textarea {
+  padding: 12px 14px;
+}
+
+.planner-modal select:focus,
+.planner-modal textarea:focus {
+  border-color: rgba(74, 144, 217, 0.46);
+  box-shadow: 0 0 0 4px rgba(74, 144, 217, 0.12);
+  outline: none;
 }
 
 .planner-modal textarea {

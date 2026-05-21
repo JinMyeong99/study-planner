@@ -121,9 +121,7 @@ export const PlannerBlockModal = ({
 }: PlannerBlockModalProps) => {
   const [values, setValues] = useState(initialValues)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
-  const [isConfirmingDelete, setIsConfirmingDelete] = useState(false)
   const courseMap = createCourseMap(courses)
-  const title = mode === 'create' ? '학습 블록 추가' : '학습 블록 편집'
   const memoLength = values.memo.length
 
   const updateValue = <Key extends keyof PlannerBlockFormValues>(
@@ -159,24 +157,20 @@ export const PlannerBlockModal = ({
   return (
     <div className="planner-modal-backdrop">
       <section
-        aria-labelledby="planner-block-modal-title"
+        aria-label={mode === 'create' ? '학습 블록 추가' : '학습 블록 편집'}
         aria-modal="true"
         className="planner-modal"
         role="dialog"
       >
         <form onSubmit={handleSubmit}>
           <div className="planner-modal__header">
-            <div>
-              <strong>로컬 편집</strong>
-              <h2 id="planner-block-modal-title">{title}</h2>
-            </div>
             <button
               aria-label="모달 닫기"
               className="planner-modal__close"
               onClick={onCancel}
               type="button"
             >
-              닫기
+              ×
             </button>
           </div>
 
@@ -279,37 +273,13 @@ export const PlannerBlockModal = ({
           <div className="planner-modal__actions">
             {mode === 'edit' && onDelete ? (
               <div className="planner-modal__delete">
-                {isConfirmingDelete ? (
-                  <>
-                    <span role="alert">이 학습 블록을 삭제할까요?</span>
-                    <button
-                      className="planner-modal__secondary-button"
-                      onClick={() => {
-                        setIsConfirmingDelete(false)
-                      }}
-                      type="button"
-                    >
-                      삭제 취소
-                    </button>
-                    <button
-                      className="planner-modal__danger-button"
-                      onClick={onDelete}
-                      type="button"
-                    >
-                      삭제 확정
-                    </button>
-                  </>
-                ) : (
-                  <button
-                    className="planner-modal__danger-button"
-                    onClick={() => {
-                      setIsConfirmingDelete(true)
-                    }}
-                    type="button"
-                  >
-                    삭제
-                  </button>
-                )}
+                <button
+                  className="planner-modal__danger-button"
+                  onClick={onDelete}
+                  type="button"
+                >
+                  삭제
+                </button>
               </div>
             ) : null}
 
