@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import { http, HttpResponse } from 'msw'
 import type { ReactElement } from 'react'
 import { describe, expect, it } from 'vitest'
@@ -25,11 +25,40 @@ describe('PlannerPage', () => {
   it('저장된 주간 블록을 렌더링한다', async () => {
     renderWithQueryClient(<PlannerPage initialWeekStart="2026-05-18" />)
 
-    expect(await screen.findByText('React 상태 관리')).toBeInTheDocument()
-    expect(screen.getByText('TypeScript 기초')).toBeInTheDocument()
+    expect(await screen.findAllByText('React 상태 관리')).toHaveLength(2)
+    expect(screen.getAllByText('TypeScript 기초')).toHaveLength(2)
     expect(screen.getByText('월요일 · 09:00 - 10:30')).toBeInTheDocument()
     expect(screen.getByText('수요일 · 14:00 - 16:00')).toBeInTheDocument()
     expect(screen.getByText('변경 없음')).toBeInTheDocument()
+  })
+
+  it('주간 시간 그리드와 시간 라벨을 렌더링한다', async () => {
+    renderWithQueryClient(<PlannerPage initialWeekStart="2026-05-18" />)
+
+    expect(
+      await screen.findByRole('heading', { name: '주간 시간표' }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('region', { name: '주간 시간 그리드' }),
+    ).toBeInTheDocument()
+    expect(screen.getByLabelText('월요일')).toBeInTheDocument()
+    expect(screen.getByLabelText('일요일')).toBeInTheDocument()
+    expect(screen.getByText('08:00')).toBeInTheDocument()
+    expect(screen.getByText('12:00')).toBeInTheDocument()
+    expect(screen.getByText('20:00')).toBeInTheDocument()
+  })
+
+  it('학습 블록을 시간 그리드 안에 배치한다', async () => {
+    renderWithQueryClient(<PlannerPage initialWeekStart="2026-05-18" />)
+
+    const grid = await screen.findByRole('region', {
+      name: '주간 시간 그리드',
+    })
+
+    expect(within(grid).getByText('React 상태 관리')).toBeInTheDocument()
+    expect(within(grid).getByText('09:00 - 10:30')).toBeInTheDocument()
+    expect(within(grid).getByText('TypeScript 기초')).toBeInTheDocument()
+    expect(within(grid).getByText('14:00 - 16:00')).toBeInTheDocument()
   })
 
   it('저장된 블록이 없는 주차는 빈 상태를 렌더링한다', async () => {
@@ -37,6 +66,9 @@ describe('PlannerPage', () => {
 
     expect(
       await screen.findByText('이번 주 학습 블록이 없습니다.'),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('region', { name: '주간 시간 그리드' }),
     ).toBeInTheDocument()
   })
 

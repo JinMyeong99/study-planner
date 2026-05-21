@@ -37,7 +37,11 @@ export const PlannerWeekGrid = ({
   const blocksByDay = getBlocksByDay(blocks)
 
   return (
-    <div className="planner-week-grid" aria-label="주간 시간 그리드">
+    <div
+      className="planner-week-grid"
+      role="region"
+      aria-label="주간 시간 그리드"
+    >
       <div className="planner-week-grid__header">
         <span aria-hidden="true" />
         {PLANNER_WEEKDAY_LABELS.map((weekday) => (
