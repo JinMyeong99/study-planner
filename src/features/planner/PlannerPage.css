@@ -81,7 +81,6 @@
 
 .planner-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1.35fr) minmax(320px, 0.65fr);
   gap: 20px;
   max-width: 1180px;
   margin: 0 auto;
@@ -139,14 +138,16 @@
 }
 
 .planner-week-grid {
-  overflow-x: auto;
   padding-bottom: 6px;
+}
+
+.planner-week-grid__day-tabs {
+  display: none;
 }
 
 .planner-week-grid__header {
   display: grid;
-  grid-template-columns: 64px repeat(7, minmax(116px, 1fr));
-  min-width: 900px;
+  grid-template-columns: 52px repeat(7, minmax(0, 1fr));
   border: 1px solid rgba(18, 27, 47, 0.08);
   border-bottom: 0;
   border-radius: 18px 18px 0 0;
@@ -161,10 +162,9 @@
 }
 
 .planner-week-grid__body {
-  --planner-slot-height: 36px;
+  --planner-slot-height: 42px;
   display: grid;
-  grid-template-columns: 64px repeat(7, minmax(116px, 1fr));
-  min-width: 900px;
+  grid-template-columns: 52px repeat(7, minmax(0, 1fr));
   min-height: calc(var(--planner-slot-count) * var(--planner-slot-height));
   border: 1px solid rgba(18, 27, 47, 0.08);
   border-radius: 0 0 18px 18px;
@@ -216,10 +216,13 @@
 
 .planner-week-grid__block {
   position: absolute;
-  right: 8px;
-  left: 8px;
+  right: 6px;
+  left: 6px;
+  display: grid;
+  align-content: start;
+  gap: 4px;
   overflow: hidden;
-  padding: 10px 10px 10px 12px;
+  padding: 9px 9px 9px 10px;
   border: 1px solid color-mix(in srgb, var(--planner-block-color) 42%, white);
   border-left: 5px solid var(--planner-block-color);
   border-radius: 14px;
@@ -228,36 +231,22 @@
 }
 
 .planner-week-grid__block strong,
-.planner-week-grid__block span,
-.planner-week-grid__block p {
+.planner-week-grid__block span {
   display: block;
 }
 
 .planner-week-grid__block strong {
-  overflow: hidden;
   color: #172033;
-  font-size: 0.86rem;
+  font-size: 0.84rem;
   line-height: 1.25;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  word-break: keep-all;
 }
 
 .planner-week-grid__block span {
-  margin-top: 4px;
   color: #475467;
-  font-size: 0.76rem;
+  font-size: 0.72rem;
   font-weight: 700;
-}
-
-.planner-week-grid__block p {
-  display: -webkit-box;
-  overflow: hidden;
-  margin: 6px 0 0;
-  color: #667085;
-  font-size: 0.75rem;
-  line-height: 1.35;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
+  white-space: nowrap;
 }
 
 .planner-block-list {
@@ -316,5 +305,51 @@
 
   .planner-status-panel {
     min-width: 0;
+  }
+
+  .planner-panel {
+    padding: 18px;
+  }
+
+  .planner-week-grid__day-tabs {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+
+  .planner-week-grid__day-tab {
+    min-width: 0;
+    padding: 9px 0;
+    border: 1px solid rgba(18, 27, 47, 0.1);
+    border-radius: 999px;
+    background: #ffffff;
+    color: #667085;
+    font-size: 0.82rem;
+    font-weight: 800;
+  }
+
+  .planner-week-grid__day-tab[aria-selected='true'] {
+    border-color: rgba(74, 144, 217, 0.34);
+    background: #eaf3ff;
+    color: #155c9f;
+  }
+
+  .planner-week-grid__header {
+    grid-template-columns: 52px minmax(0, 1fr);
+  }
+
+  .planner-week-grid__body {
+    grid-template-columns: 52px minmax(0, 1fr);
+  }
+
+  .planner-week-grid__weekday:not(.is-selected),
+  .planner-week-grid__day-column:not(.is-selected) {
+    display: none;
+  }
+
+  .planner-week-grid__block {
+    right: 8px;
+    left: 8px;
   }
 }
