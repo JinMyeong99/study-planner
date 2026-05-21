@@ -11,6 +11,7 @@ import {
 
 interface PlannerWeekGridProps {
   blocks: StudyBlock[]
+  conflictBlockIds?: Set<string>
   courses: Course[]
   onBlockClick: (block: StudyBlock) => void
   onSlotClick: (selection: { dayOfWeek: number; startTime: string }) => void
@@ -46,6 +47,7 @@ const getBlockClassName = (durationMinutes: number, hasMemo: boolean) =>
 
 export const PlannerWeekGrid = ({
   blocks,
+  conflictBlockIds = new Set<string>(),
   courses,
   onBlockClick,
   onSlotClick,
@@ -141,6 +143,7 @@ export const PlannerWeekGrid = ({
             {blocksByDay[dayOfWeek].map((block) => {
               const course = courseMap.get(block.courseId)
               const placement = getBlockGridPlacement(block)
+              const hasConflict = conflictBlockIds.has(block.id)
               const blockStyle = {
                 '--planner-block-color': course?.color ?? '#8f97a8',
                 '--planner-block-bg': getCourseBackground(
@@ -154,10 +157,15 @@ export const PlannerWeekGrid = ({
               return (
                 <button
                   aria-label={`${courseTitle} ${block.startTime} - ${block.endTime} 편집`}
-                  className={getBlockClassName(
-                    placement.durationMinutes,
-                    Boolean(block.memo),
-                  )}
+                  className={[
+                    getBlockClassName(
+                      placement.durationMinutes,
+                      Boolean(block.memo),
+                    ),
+                    hasConflict ? 'is-conflict' : '',
+                  ]
+                    .filter(Boolean)
+                    .join(' ')}
                   key={block.id}
                   onClick={() => {
                     onBlockClick(block)
@@ -169,6 +177,9 @@ export const PlannerWeekGrid = ({
                   <span>
                     {block.startTime} - {block.endTime}
                   </span>
+                  {hasConflict ? (
+                    <em className="planner-conflict-badge">시간 충돌</em>
+                  ) : null}
                   {block.memo && placement.durationMinutes >= 60 ? (
                     <p>{block.memo}</p>
                   ) : null}

@@ -1,5 +1,7 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 
+import { PlannerApiError, savePlanner } from './api'
 import {
   PlannerBlockModal,
   type PlannerBlockFormValues,
@@ -10,11 +12,18 @@ import {
   getWeekDateRangeLabel,
   getWeekStartDate,
 } from './utils/date'
+import { findFirstTimeConflict } from './utils/conflict'
 import { getNextPlannerSlotTime, parseTimeToMinutes } from './utils/time'
+import {
+  createSavePlannerPayload,
+  formatConflictMessage,
+  getConflictBlockIds,
+} from './utils/save'
 import { useEditablePlannerState } from './hooks/useEditablePlannerState'
 import { usePlannerData } from './hooks/usePlannerData'
 import { PlannerWeekGrid } from './PlannerWeekGrid'
 import type { Course, StudyBlock } from './types'
+import { plannerQueryKeys } from './queryKeys'
 import './PlannerPage.css'
 
 export interface PlannerPageProps {
@@ -31,6 +40,13 @@ type PlannerModalState =
       mode: 'edit'
       initialValues: PlannerBlockFormValues
     }
+
+type SaveFeedback =
+  | {
+      message: string
+      type: 'success' | 'error'
+    }
+  | null
 
 const sortPlannerBlocks = (blocks: StudyBlock[]) =>
   [...blocks].sort((firstBlock, secondBlock) => {
@@ -79,12 +95,22 @@ const getMemoPayload = (memo: string) => {
   return trimmedMemo ? { memo: trimmedMemo } : {}
 }
 
+const getSaveErrorMessage = (error: unknown) => {
+  if (error instanceof PlannerApiError) {
+    return error.message
+  }
+
+  return '플래너 저장에 실패했습니다. 다시 시도해 주세요.'
+}
+
 const PlannerBlockList = ({
   blocks,
+  conflictBlockIds = new Set<string>(),
   courses,
   onBlockSelect,
 }: {
   blocks: StudyBlock[]
+  conflictBlockIds?: Set<string>
   courses: Course[]
   onBlockSelect: (block: StudyBlock) => void
 }) => {
@@ -104,12 +130,17 @@ const PlannerBlockList = ({
     <ul className="planner-block-list">
       {sortedBlocks.map((block) => {
         const course = courseMap.get(block.courseId)
+        const hasConflict = conflictBlockIds.has(block.id)
 
         return (
           <li key={block.id}>
             <button
               aria-label={`${course?.title ?? '알 수 없는 강의'} ${formatDayOfWeek(block.dayOfWeek)}요일 ${block.startTime} - ${block.endTime} 편집`}
-              className="planner-block-card"
+              className={
+                hasConflict
+                  ? 'planner-block-card is-conflict'
+                  : 'planner-block-card'
+              }
               onClick={() => {
                 onBlockSelect(block)
               }}
@@ -126,6 +157,9 @@ const PlannerBlockList = ({
                   {formatDayOfWeek(block.dayOfWeek)}요일 · {block.startTime} -{' '}
                   {block.endTime}
                 </span>
+                {hasConflict ? (
+                  <em className="planner-conflict-badge">시간 충돌</em>
+                ) : null}
                 {block.memo ? <p>{block.memo}</p> : null}
               </span>
             </button>
@@ -138,6 +172,9 @@ const PlannerBlockList = ({
 
 export const PlannerPage = ({ initialWeekStart }: PlannerPageProps) => {
   const [modalState, setModalState] = useState<PlannerModalState | null>(null)
+  const [saveFeedback, setSaveFeedback] = useState<SaveFeedback>(null)
+  const [isToastDismissing, setIsToastDismissing] = useState(false)
+  const queryClient = useQueryClient()
   const defaultWeekStart = useMemo(() => getCurrentWeekStart(), [])
   const weekStart = initialWeekStart ?? defaultWeekStart
   const plannerData = usePlannerData(weekStart)
@@ -147,12 +184,59 @@ export const PlannerPage = ({ initialWeekStart }: PlannerPageProps) => {
     savedBlocks: plannerData.savedBlocks,
     isReady: isPlannerReady,
   })
+  const conflictPair = useMemo(
+    () => findFirstTimeConflict(editablePlanner.draftBlocks),
+    [editablePlanner.draftBlocks],
+  )
+  const conflictBlockIds = useMemo(
+    () => getConflictBlockIds(conflictPair),
+    [conflictPair],
+  )
+  const conflictMessage = conflictPair
+    ? formatConflictMessage(conflictPair, plannerData.courses)
+    : null
+  const saveMutation = useMutation({
+    mutationFn: savePlanner,
+    onSuccess: (response) => {
+      queryClient.setQueryData(
+        plannerQueryKeys.week(response.weekStart),
+        response,
+      )
+      editablePlanner.resetDraft()
+      setSaveFeedback({
+        message: '저장되었습니다.',
+        type: 'success',
+      })
+    },
+    onError: (error) => {
+      setSaveFeedback({
+        message: getSaveErrorMessage(error),
+        type: 'error',
+      })
+    },
+  })
+  const dismissToast = () => {
+    setIsToastDismissing(true)
+    setTimeout(() => {
+      setSaveFeedback(null)
+      setIsToastDismissing(false)
+    }, 180)
+  }
+  useEffect(() => {
+    if (saveFeedback?.type !== 'success') return
+    const timer = setTimeout(dismissToast, 3000)
+    return () => clearTimeout(timer)
+  }, [saveFeedback])
   const canShowPlannerContent = isPlannerReady && editablePlanner.isReady
+  const canSavePlanner =
+    canShowPlannerContent && editablePlanner.isDirty && !saveMutation.isPending
   const closeModal = () => {
     setModalState(null)
   }
 
   const handleModalSubmit = (values: PlannerBlockFormValues) => {
+    setSaveFeedback(null)
+
     const nextBlockValues = {
       courseId: values.courseId,
       dayOfWeek: values.dayOfWeek,
@@ -174,12 +258,35 @@ export const PlannerPage = ({ initialWeekStart }: PlannerPageProps) => {
   }
 
   const handleModalDelete = () => {
+    setSaveFeedback(null)
+
     if (modalState?.mode !== 'edit') {
       return
     }
 
     editablePlanner.deleteDraftBlock(modalState.block.id)
     closeModal()
+  }
+
+  const handleSave = () => {
+    if (saveMutation.isPending || !editablePlanner.isDirty) {
+      return
+    }
+
+    if (conflictPair) {
+      setSaveFeedback({
+        message: formatConflictMessage(conflictPair, plannerData.courses),
+        type: 'error',
+      })
+      return
+    }
+
+    saveMutation.mutate(
+      createSavePlannerPayload(
+        plannerData.plannerWeekStart,
+        editablePlanner.draftBlocks,
+      ),
+    )
   }
 
   return (
@@ -237,8 +344,14 @@ export const PlannerPage = ({ initialWeekStart }: PlannerPageProps) => {
               <h2 id="planner-grid-title">주간 시간표</h2>
               <span>08:00 - 20:00 · 30분 단위</span>
             </div>
+            {conflictMessage ? (
+              <p className="planner-conflict-alert" role="alert">
+                {conflictMessage}
+              </p>
+            ) : null}
             <PlannerWeekGrid
               blocks={editablePlanner.draftBlocks}
+              conflictBlockIds={conflictBlockIds}
               courses={plannerData.courses}
               onBlockClick={(block) => {
                 setModalState({
@@ -266,6 +379,7 @@ export const PlannerPage = ({ initialWeekStart }: PlannerPageProps) => {
             </div>
             <PlannerBlockList
               blocks={editablePlanner.draftBlocks}
+              conflictBlockIds={conflictBlockIds}
               courses={plannerData.courses}
               onBlockSelect={(block) => {
                 setModalState({
@@ -276,6 +390,37 @@ export const PlannerPage = ({ initialWeekStart }: PlannerPageProps) => {
               }}
             />
           </section>
+        </div>
+      ) : null}
+
+      <div className="planner-save-footer">
+        <button
+          className="planner-save-button"
+          disabled={!canSavePlanner}
+          onClick={handleSave}
+          type="button"
+        >
+          {saveMutation.isPending ? '저장 중...' : '저장'}
+        </button>
+      </div>
+
+      {saveFeedback ? (
+        <div
+          className={`planner-toast planner-toast--${saveFeedback.type}${isToastDismissing ? ' is-dismissing' : ''}`}
+          role={saveFeedback.type === 'error' ? 'alert' : 'status'}
+        >
+          <em aria-hidden="true" className="planner-toast__icon">
+            {saveFeedback.type === 'success' ? '✓' : '!'}
+          </em>
+          <span className="planner-toast__message">{saveFeedback.message}</span>
+          <button
+            aria-label="닫기"
+            className="planner-toast__close"
+            onClick={dismissToast}
+            type="button"
+          >
+            ×
+          </button>
         </div>
       ) : null}
 

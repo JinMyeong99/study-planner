@@ -12,6 +12,11 @@ dist
 dist-ssr
 *.local
 
+# AI agent config
+CLAUDE.md
+.claude/settings.local.json
+.claude/launch.json
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

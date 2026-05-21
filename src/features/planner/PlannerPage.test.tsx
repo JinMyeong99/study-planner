@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { render, screen, within } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { http, HttpResponse } from 'msw'
 import type { ReactElement } from 'react'
@@ -7,6 +7,7 @@ import { describe, expect, it } from 'vitest'
 
 import { server } from '../../mocks/server'
 import { PlannerPage } from './PlannerPage'
+import type { SavePlannerRequest, SavePlannerResponse } from './types'
 
 const renderWithQueryClient = (ui: ReactElement) => {
   const queryClient = new QueryClient({
@@ -138,6 +139,144 @@ describe('PlannerPage', () => {
     expect(screen.getByText('월요일 · 10:30 - 11:00')).toBeInTheDocument()
     expect(screen.getByText('저장되지 않은 변경 사항')).toBeInTheDocument()
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+  })
+
+  it('변경 사항이 없으면 저장 버튼을 비활성화한다', async () => {
+    renderWithQueryClient(<PlannerPage initialWeekStart="2026-05-18" />)
+
+    await screen.findByText('변경 없음')
+
+    expect(screen.getByRole('button', { name: '저장' })).toBeDisabled()
+  })
+
+  it('저장 성공 시 서버 응답으로 동기화하고 dirty 상태를 초기화한다', async () => {
+    const user = userEvent.setup()
+    let savedBlocksPayload: SavePlannerRequest['blocks'] | null = null
+
+    server.use(
+      http.put('/api/planner', async ({ request }) => {
+        const saveRequest = (await request.json()) as SavePlannerRequest
+        savedBlocksPayload = saveRequest.blocks
+        await new Promise((resolve) => {
+          setTimeout(resolve, 20)
+        })
+
+        return HttpResponse.json<SavePlannerResponse>({
+          weekStart: saveRequest.weekStart,
+          blocks: saveRequest.blocks.map((block, index) => ({
+            id: block.id ?? `block-saved-${index}`,
+            courseId: block.courseId,
+            dayOfWeek: block.dayOfWeek,
+            startTime: block.startTime,
+            endTime: block.endTime,
+            ...(block.memo ? { memo: block.memo } : {}),
+          })),
+        })
+      }),
+    )
+
+    renderWithQueryClient(<PlannerPage initialWeekStart="2026-05-18" />)
+
+    await user.click(
+      await screen.findByRole('button', {
+        name: '월요일 10:30 학습 블록 추가',
+      }),
+    )
+    await user.selectOptions(screen.getByLabelText('강의'), 'course-react')
+    await user.click(screen.getByRole('button', { name: '확인' }))
+
+    const saveButton = screen.getByRole('button', { name: '저장' })
+
+    expect(saveButton).toBeEnabled()
+
+    await user.click(saveButton)
+
+    expect(screen.getByRole('button', { name: '저장 중...' })).toBeDisabled()
+    expect(await screen.findByText('저장되었습니다.')).toBeInTheDocument()
+    expect(screen.getByText('변경 없음')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '저장' })).toBeDisabled()
+
+    await waitFor(() => {
+      expect(savedBlocksPayload).not.toBeNull()
+    })
+    expect(savedBlocksPayload).toContainEqual({
+      courseId: 'course-react',
+      dayOfWeek: 0,
+      startTime: '10:30',
+      endTime: '11:00',
+    })
+  })
+
+  it('저장 실패 시 에러를 보여주고 draft 변경 사항을 유지한다', async () => {
+    const user = userEvent.setup()
+
+    server.use(
+      http.put('/api/planner', () =>
+        HttpResponse.json(
+          {
+            code: 'INVALID_BLOCK',
+            message: '저장할 수 없는 블록입니다.',
+          },
+          { status: 400 },
+        ),
+      ),
+    )
+
+    renderWithQueryClient(<PlannerPage initialWeekStart="2026-05-18" />)
+
+    await user.click(
+      await screen.findByRole('button', {
+        name: '월요일 10:30 학습 블록 추가',
+      }),
+    )
+    await user.selectOptions(screen.getByLabelText('강의'), 'course-react')
+    await user.click(screen.getByRole('button', { name: '확인' }))
+    await user.click(screen.getByRole('button', { name: '저장' }))
+
+    expect(await screen.findByText('저장할 수 없는 블록입니다.')).toBeInTheDocument()
+    expect(screen.getByText('월요일 · 10:30 - 11:00')).toBeInTheDocument()
+    expect(screen.getByText('저장되지 않은 변경 사항')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '저장' })).toBeEnabled()
+  })
+
+  it('충돌 블록을 경고 메시지와 배지로 표시한다', async () => {
+    server.use(
+      http.get('/api/planner', () =>
+        HttpResponse.json({
+          weekStart: '2026-05-18',
+          blocks: [
+            {
+              id: 'block-1',
+              courseId: 'course-react',
+              dayOfWeek: 0,
+              startTime: '09:00',
+              endTime: '10:30',
+            },
+            {
+              id: 'block-2',
+              courseId: 'course-typescript',
+              dayOfWeek: 0,
+              startTime: '10:00',
+              endTime: '11:00',
+            },
+          ],
+        }),
+      ),
+    )
+
+    renderWithQueryClient(<PlannerPage initialWeekStart="2026-05-18" />)
+
+    expect(
+      await screen.findByText(
+        'React 상태 관리(월요일 09:00 - 10:30)와 TypeScript 기초(월요일 10:00 - 11:00) 시간이 겹칩니다.',
+      ),
+    ).toBeInTheDocument()
+    expect(screen.getAllByText('시간 충돌').length).toBeGreaterThanOrEqual(2)
+    expect(
+      screen.getByRole('button', {
+        name: 'React 상태 관리 09:00 - 10:30 편집',
+      }),
+    ).toHaveClass('is-conflict')
   })
 
   it('30분 블록은 compact 표시를 적용하고 그리드 메모를 숨긴다', async () => {
