@@ -275,10 +275,12 @@
   line-height: 1.35;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 1;
+  line-clamp: 1;
 }
 
 .planner-week-grid__block.has-large-memo-preview p {
   -webkit-line-clamp: 2;
+  line-clamp: 2;
 }
 
 .planner-week-grid__block.is-compact {
