@@ -21,6 +21,7 @@ import {
 } from './utils/save'
 import { useEditablePlannerState } from './hooks/useEditablePlannerState'
 import { usePlannerData } from './hooks/usePlannerData'
+import { useUnsavedChangesWarning } from './hooks/useUnsavedChangesWarning'
 import { PlannerSummary } from './PlannerSummary'
 import { PlannerWeekGrid } from './PlannerWeekGrid'
 import type { Course, StudyBlock } from './types'
@@ -231,6 +232,7 @@ export const PlannerPage = ({ initialWeekStart }: PlannerPageProps) => {
   const canShowPlannerContent = isPlannerReady && editablePlanner.isReady
   const canSavePlanner =
     canShowPlannerContent && editablePlanner.isDirty && !saveMutation.isPending
+  useUnsavedChangesWarning(canShowPlannerContent && editablePlanner.isDirty)
   const closeModal = () => {
     setModalState(null)
   }
