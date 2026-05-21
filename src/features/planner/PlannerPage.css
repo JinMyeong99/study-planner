@@ -427,19 +427,20 @@
   background: #f8fafc;
 }
 
+.planner-week-grid__time-axis span:first-child {
+  transform: translateY(0);
+}
+
 .planner-week-grid__time-axis span {
   position: absolute;
   right: 0;
+  left: 0;
   transform: translateY(-50%);
-  padding-right: 10px;
   color: #98a2b3;
   font-size: 0.78rem;
-  text-align: right;
+  text-align: center;
 }
 
-.planner-week-grid__time-axis span:first-child {
-  transform: translateY(10px);
-}
 
 .planner-week-grid__day-column {
   position: relative;
