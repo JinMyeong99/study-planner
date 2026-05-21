@@ -207,11 +207,20 @@
 }
 
 .planner-week-grid__slot {
+  min-width: 0;
+  border: 0;
   border-bottom: 1px solid rgba(18, 27, 47, 0.07);
+  background: transparent;
+  padding: 0;
 }
 
 .planner-week-grid__slot:nth-child(2n) {
   border-bottom-color: rgba(18, 27, 47, 0.12);
+}
+
+.planner-week-grid__slot:hover,
+.planner-week-grid__slot:focus-visible {
+  background: rgba(74, 144, 217, 0.08);
 }
 
 .planner-week-grid__block {
@@ -228,6 +237,15 @@
   border-radius: 14px;
   background: linear-gradient(135deg, var(--planner-block-bg), #ffffff 92%);
   box-shadow: 0 12px 24px rgba(32, 43, 68, 0.12);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+}
+
+.planner-week-grid__block:hover,
+.planner-week-grid__block:focus-visible {
+  transform: translateY(-1px);
+  box-shadow: 0 16px 30px rgba(32, 43, 68, 0.16);
 }
 
 .planner-week-grid__block strong,
@@ -259,11 +277,21 @@
 
 .planner-block-card {
   display: flex;
+  width: 100%;
   gap: 14px;
   padding: 14px;
   border: 1px solid rgba(18, 27, 47, 0.08);
   border-radius: 18px;
   background: #ffffff;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+}
+
+.planner-block-card:hover,
+.planner-block-card:focus-visible {
+  border-color: rgba(74, 144, 217, 0.3);
+  box-shadow: 0 12px 28px rgba(32, 43, 68, 0.08);
 }
 
 .planner-block-card__color {

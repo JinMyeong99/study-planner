@@ -11,6 +11,8 @@ import {
 interface PlannerWeekGridProps {
   blocks: StudyBlock[]
   courses: Course[]
+  onBlockClick: (block: StudyBlock) => void
+  onSlotClick: (selection: { dayOfWeek: number; startTime: string }) => void
 }
 
 const timeSlots = createPlannerTimeSlots()
@@ -32,6 +34,8 @@ const getBlocksByDay = (blocks: StudyBlock[]) =>
 export const PlannerWeekGrid = ({
   blocks,
   courses,
+  onBlockClick,
+  onSlotClick,
 }: PlannerWeekGridProps) => {
   const [selectedDayOfWeek, setSelectedDayOfWeek] = useState(0)
   const courseMap = createCourseMap(courses)
@@ -101,10 +105,17 @@ export const PlannerWeekGrid = ({
             aria-label={`${weekday}요일`}
           >
             {timeSlots.map((slot) => (
-              <span
-                aria-hidden="true"
+              <button
+                aria-label={`${weekday}요일 ${slot} 학습 블록 추가`}
                 className="planner-week-grid__slot"
                 key={slot}
+                onClick={() => {
+                  onSlotClick({
+                    dayOfWeek,
+                    startTime: slot,
+                  })
+                }}
+                type="button"
               />
             ))}
             {blocksByDay[dayOfWeek].map((block) => {
@@ -118,18 +129,24 @@ export const PlannerWeekGrid = ({
                 height: `${placement.height}%`,
                 top: `${placement.top}%`,
               } as CSSProperties
+              const courseTitle = course?.title ?? '알 수 없는 강의'
 
               return (
-                <article
+                <button
+                  aria-label={`${courseTitle} ${block.startTime} - ${block.endTime} 편집`}
                   className="planner-week-grid__block"
                   key={block.id}
+                  onClick={() => {
+                    onBlockClick(block)
+                  }}
                   style={blockStyle}
+                  type="button"
                 >
-                  <strong>{course?.title ?? '알 수 없는 강의'}</strong>
+                  <strong>{courseTitle}</strong>
                   <span>
                     {block.startTime} - {block.endTime}
                   </span>
-                </article>
+                </button>
               )
             })}
           </div>

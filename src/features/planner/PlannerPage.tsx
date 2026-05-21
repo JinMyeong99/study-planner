@@ -1,12 +1,16 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 
+import {
+  PlannerBlockModal,
+  type PlannerBlockFormValues,
+} from './PlannerBlockModal'
 import {
   formatDayOfWeek,
   formatLocalDate,
   getWeekDateRangeLabel,
   getWeekStartDate,
 } from './utils/date'
-import { parseTimeToMinutes } from './utils/time'
+import { getNextPlannerSlotTime, parseTimeToMinutes } from './utils/time'
 import { useEditablePlannerState } from './hooks/useEditablePlannerState'
 import { usePlannerData } from './hooks/usePlannerData'
 import { PlannerWeekGrid } from './PlannerWeekGrid'
@@ -16,6 +20,17 @@ import './PlannerPage.css'
 export interface PlannerPageProps {
   initialWeekStart?: string
 }
+
+type PlannerModalState =
+  | {
+      mode: 'create'
+      initialValues: PlannerBlockFormValues
+    }
+  | {
+      block: StudyBlock
+      mode: 'edit'
+      initialValues: PlannerBlockFormValues
+    }
 
 const sortPlannerBlocks = (blocks: StudyBlock[]) =>
   [...blocks].sort((firstBlock, secondBlock) => {
@@ -34,12 +49,44 @@ const createCourseMap = (courses: Course[]) =>
 
 const getCurrentWeekStart = () => formatLocalDate(getWeekStartDate(new Date()))
 
+const createFormValuesFromBlock = (
+  block: StudyBlock,
+): PlannerBlockFormValues => ({
+  courseId: block.courseId,
+  dayOfWeek: block.dayOfWeek,
+  startTime: block.startTime,
+  endTime: block.endTime,
+  memo: block.memo ?? '',
+})
+
+const createFormValuesFromSlot = ({
+  dayOfWeek,
+  startTime,
+}: {
+  dayOfWeek: number
+  startTime: string
+}): PlannerBlockFormValues => ({
+  courseId: '',
+  dayOfWeek,
+  startTime,
+  endTime: getNextPlannerSlotTime(startTime),
+  memo: '',
+})
+
+const getMemoPayload = (memo: string) => {
+  const trimmedMemo = memo.trim()
+
+  return trimmedMemo ? { memo: trimmedMemo } : {}
+}
+
 const PlannerBlockList = ({
   blocks,
   courses,
+  onBlockSelect,
 }: {
   blocks: StudyBlock[]
   courses: Course[]
+  onBlockSelect: (block: StudyBlock) => void
 }) => {
   const courseMap = createCourseMap(courses)
   const sortedBlocks = sortPlannerBlocks(blocks)
@@ -48,7 +95,7 @@ const PlannerBlockList = ({
     return (
       <div className="planner-empty-state">
         <strong>이번 주 학습 블록이 없습니다.</strong>
-        <span>다음 작업에서 시간 슬롯을 클릭해 블록을 추가할 수 있습니다.</span>
+        <span>시간 슬롯을 클릭해 학습 블록을 추가할 수 있습니다.</span>
       </div>
     )
   }
@@ -59,20 +106,29 @@ const PlannerBlockList = ({
         const course = courseMap.get(block.courseId)
 
         return (
-          <li className="planner-block-card" key={block.id}>
-            <span
-              aria-hidden="true"
-              className="planner-block-card__color"
-              style={{ backgroundColor: course?.color ?? '#8f97a8' }}
-            />
-            <div className="planner-block-card__content">
-              <strong>{course?.title ?? '알 수 없는 강의'}</strong>
-              <span>
-                {formatDayOfWeek(block.dayOfWeek)}요일 · {block.startTime} -{' '}
-                {block.endTime}
+          <li key={block.id}>
+            <button
+              aria-label={`${course?.title ?? '알 수 없는 강의'} ${formatDayOfWeek(block.dayOfWeek)}요일 ${block.startTime} - ${block.endTime} 편집`}
+              className="planner-block-card"
+              onClick={() => {
+                onBlockSelect(block)
+              }}
+              type="button"
+            >
+              <span
+                aria-hidden="true"
+                className="planner-block-card__color"
+                style={{ backgroundColor: course?.color ?? '#8f97a8' }}
+              />
+              <span className="planner-block-card__content">
+                <strong>{course?.title ?? '알 수 없는 강의'}</strong>
+                <span>
+                  {formatDayOfWeek(block.dayOfWeek)}요일 · {block.startTime} -{' '}
+                  {block.endTime}
+                </span>
+                {block.memo ? <p>{block.memo}</p> : null}
               </span>
-              {block.memo ? <p>{block.memo}</p> : null}
-            </div>
+            </button>
           </li>
         )
       })}
@@ -81,6 +137,7 @@ const PlannerBlockList = ({
 }
 
 export const PlannerPage = ({ initialWeekStart }: PlannerPageProps) => {
+  const [modalState, setModalState] = useState<PlannerModalState | null>(null)
   const defaultWeekStart = useMemo(() => getCurrentWeekStart(), [])
   const weekStart = initialWeekStart ?? defaultWeekStart
   const plannerData = usePlannerData(weekStart)
@@ -91,6 +148,39 @@ export const PlannerPage = ({ initialWeekStart }: PlannerPageProps) => {
     isReady: isPlannerReady,
   })
   const canShowPlannerContent = isPlannerReady && editablePlanner.isReady
+  const closeModal = () => {
+    setModalState(null)
+  }
+
+  const handleModalSubmit = (values: PlannerBlockFormValues) => {
+    const nextBlockValues = {
+      courseId: values.courseId,
+      dayOfWeek: values.dayOfWeek,
+      startTime: values.startTime,
+      endTime: values.endTime,
+      ...getMemoPayload(values.memo),
+    }
+
+    if (modalState?.mode === 'edit') {
+      editablePlanner.updateDraftBlock({
+        id: modalState.block.id,
+        ...nextBlockValues,
+      })
+    } else {
+      editablePlanner.addDraftBlock(nextBlockValues)
+    }
+
+    closeModal()
+  }
+
+  const handleModalDelete = () => {
+    if (modalState?.mode !== 'edit') {
+      return
+    }
+
+    editablePlanner.deleteDraftBlock(modalState.block.id)
+    closeModal()
+  }
 
   return (
     <main className="planner-page">
@@ -145,11 +235,24 @@ export const PlannerPage = ({ initialWeekStart }: PlannerPageProps) => {
           <section className="planner-panel" aria-labelledby="planner-grid-title">
             <div className="planner-panel__header">
               <h2 id="planner-grid-title">주간 시간표</h2>
-              <span>08:00 - 20:00 · 30분 단위 예정</span>
+              <span>08:00 - 20:00 · 30분 단위</span>
             </div>
             <PlannerWeekGrid
               blocks={editablePlanner.draftBlocks}
               courses={plannerData.courses}
+              onBlockClick={(block) => {
+                setModalState({
+                  block,
+                  mode: 'edit',
+                  initialValues: createFormValuesFromBlock(block),
+                })
+              }}
+              onSlotClick={(selection) => {
+                setModalState({
+                  mode: 'create',
+                  initialValues: createFormValuesFromSlot(selection),
+                })
+              }}
             />
           </section>
 
@@ -158,15 +261,37 @@ export const PlannerPage = ({ initialWeekStart }: PlannerPageProps) => {
             aria-labelledby="planner-block-list-title"
           >
             <div className="planner-panel__header">
-              <h2 id="planner-block-list-title">저장된 학습 블록</h2>
+              <h2 id="planner-block-list-title">편집 중 학습 블록</h2>
               <span>{editablePlanner.draftBlocks.length}개</span>
             </div>
             <PlannerBlockList
               blocks={editablePlanner.draftBlocks}
               courses={plannerData.courses}
+              onBlockSelect={(block) => {
+                setModalState({
+                  block,
+                  mode: 'edit',
+                  initialValues: createFormValuesFromBlock(block),
+                })
+              }}
             />
           </section>
         </div>
+      ) : null}
+
+      {modalState ? (
+        <PlannerBlockModal
+          blocks={editablePlanner.draftBlocks}
+          courses={plannerData.courses}
+          editingBlockId={
+            modalState.mode === 'edit' ? modalState.block.id : undefined
+          }
+          initialValues={modalState.initialValues}
+          mode={modalState.mode}
+          onCancel={closeModal}
+          onDelete={modalState.mode === 'edit' ? handleModalDelete : undefined}
+          onSubmit={handleModalSubmit}
+        />
       ) : null}
     </main>
   )
