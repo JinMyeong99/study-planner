@@ -31,7 +31,7 @@
 .planner-status-panel {
   display: grid;
   gap: 10px;
-  min-width: 260px;
+  min-width: 280px;
   padding: 18px;
   border: 1px solid rgba(18, 27, 47, 0.08);
   border-radius: 22px;
@@ -53,7 +53,8 @@
 .planner-save-button {
   border: 0;
   border-radius: 999px;
-  padding: 11px 16px;
+  min-width: 132px;
+  padding: 13px 22px;
   background: #172033;
   color: #ffffff;
   font-weight: 800;
@@ -65,20 +66,27 @@
   color: #667085;
 }
 
-.planner-status-panel .planner-save-feedback {
-  display: block;
-  justify-content: initial;
-  padding-top: 2px;
+.planner-save-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  max-width: 1180px;
+  margin: 16px auto 0;
+}
+
+.planner-save-status {
   color: #667085;
   font-size: 0.9rem;
   line-height: 1.4;
+  min-height: 1.4em;
 }
 
-.planner-status-panel .planner-save-feedback--success {
+.planner-save-status--success {
   color: #247a4d;
 }
 
-.planner-status-panel .planner-save-feedback--error {
+.planner-save-status--error {
   color: #b42335;
 }
 
@@ -610,6 +618,15 @@
 
   .planner-status-panel {
     min-width: 0;
+  }
+
+  .planner-save-footer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .planner-save-button {
+    width: 100%;
   }
 
   .planner-panel {

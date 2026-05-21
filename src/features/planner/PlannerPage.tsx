@@ -300,22 +300,6 @@ export const PlannerPage = ({ initialWeekStart }: PlannerPageProps) => {
               {editablePlanner.isDirty ? '저장되지 않은 변경 사항' : '변경 없음'}
             </strong>
           </span>
-          <button
-            className="planner-save-button"
-            disabled={!canSavePlanner}
-            onClick={handleSave}
-            type="button"
-          >
-            {saveMutation.isPending ? '저장 중...' : '저장'}
-          </button>
-          {saveFeedback ? (
-            <span
-              className={`planner-save-feedback planner-save-feedback--${saveFeedback.type}`}
-              role={saveFeedback.type === 'error' ? 'alert' : 'status'}
-            >
-              {saveFeedback.message}
-            </span>
-          ) : null}
         </div>
       </section>
 
@@ -395,6 +379,27 @@ export const PlannerPage = ({ initialWeekStart }: PlannerPageProps) => {
           </section>
         </div>
       ) : null}
+
+      <div className="planner-save-footer">
+        {saveFeedback ? (
+          <span
+            className={`planner-save-status planner-save-status--${saveFeedback.type}`}
+            role={saveFeedback.type === 'error' ? 'alert' : 'status'}
+          >
+            {saveFeedback.message}
+          </span>
+        ) : (
+          <span className="planner-save-status" />
+        )}
+        <button
+          className="planner-save-button"
+          disabled={!canSavePlanner}
+          onClick={handleSave}
+          type="button"
+        >
+          {saveMutation.isPending ? '저장 중...' : '저장'}
+        </button>
+      </div>
 
       {modalState ? (
         <PlannerBlockModal
