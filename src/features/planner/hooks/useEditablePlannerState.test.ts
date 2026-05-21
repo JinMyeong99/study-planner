@@ -69,11 +69,60 @@ describe('useEditablePlannerState', () => {
     await waitFor(() => expect(result.current.isReady).toBe(true))
 
     act(() => {
-      result.current.setDraftBlocks([...result.current.draftBlocks, draftBlock])
+      result.current.addDraftBlock({
+        courseId: draftBlock.courseId,
+        dayOfWeek: draftBlock.dayOfWeek,
+        startTime: draftBlock.startTime,
+        endTime: draftBlock.endTime,
+      })
     })
 
     expect(result.current.isDirty).toBe(true)
-    expect(result.current.draftBlocks).toEqual([savedBlock, draftBlock])
+    expect(result.current.draftBlocks).toEqual([
+      savedBlock,
+      expect.objectContaining({
+        id: expect.stringMatching(/^draft-/),
+        courseId: draftBlock.courseId,
+        dayOfWeek: draftBlock.dayOfWeek,
+        startTime: draftBlock.startTime,
+        endTime: draftBlock.endTime,
+      }),
+    ])
+  })
+
+  it('draft 블록을 수정하고 삭제한다', async () => {
+    const { result } = renderHook(
+      () =>
+        useEditablePlannerState({
+          weekStart: '2026-05-18',
+          savedBlocks: [savedBlock],
+          isReady: true,
+        }),
+    )
+
+    await waitFor(() => expect(result.current.isReady).toBe(true))
+
+    act(() => {
+      result.current.updateDraftBlock({
+        ...savedBlock,
+        memo: '수정된 메모',
+      })
+    })
+
+    expect(result.current.draftBlocks).toEqual([
+      {
+        ...savedBlock,
+        memo: '수정된 메모',
+      },
+    ])
+    expect(result.current.isDirty).toBe(true)
+
+    act(() => {
+      result.current.deleteDraftBlock(savedBlock.id)
+    })
+
+    expect(result.current.draftBlocks).toEqual([])
+    expect(result.current.isDirty).toBe(true)
   })
 
   it('resetDraft를 호출하면 서버 기준 상태로 돌아간다', async () => {
@@ -94,7 +143,12 @@ describe('useEditablePlannerState', () => {
     await waitFor(() => expect(result.current.isReady).toBe(true))
 
     act(() => {
-      result.current.setDraftBlocks([draftBlock])
+      result.current.addDraftBlock({
+        courseId: draftBlock.courseId,
+        dayOfWeek: draftBlock.dayOfWeek,
+        startTime: draftBlock.startTime,
+        endTime: draftBlock.endTime,
+      })
     })
     act(() => {
       result.current.resetDraft()
@@ -122,7 +176,12 @@ describe('useEditablePlannerState', () => {
     await waitFor(() => expect(result.current.isReady).toBe(true))
 
     act(() => {
-      result.current.setDraftBlocks([...result.current.draftBlocks, draftBlock])
+      result.current.addDraftBlock({
+        courseId: draftBlock.courseId,
+        dayOfWeek: draftBlock.dayOfWeek,
+        startTime: draftBlock.startTime,
+        endTime: draftBlock.endTime,
+      })
     })
 
     rerender({
@@ -133,7 +192,16 @@ describe('useEditablePlannerState', () => {
       expect(result.current.savedBlocks).toEqual([savedBlock, serverBlock]),
     )
 
-    expect(result.current.draftBlocks).toEqual([savedBlock, draftBlock])
+    expect(result.current.draftBlocks).toEqual([
+      savedBlock,
+      expect.objectContaining({
+        id: expect.stringMatching(/^draft-/),
+        courseId: draftBlock.courseId,
+        dayOfWeek: draftBlock.dayOfWeek,
+        startTime: draftBlock.startTime,
+        endTime: draftBlock.endTime,
+      }),
+    ])
     expect(result.current.isDirty).toBe(true)
   })
 })
