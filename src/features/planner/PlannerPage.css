@@ -352,7 +352,6 @@
 .planner-empty-state {
   display: grid;
   place-items: center;
-  min-height: 320px;
   padding: 32px;
   border: 1px dashed rgba(71, 97, 121, 0.28);
   border-radius: 22px;
