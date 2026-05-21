@@ -324,7 +324,7 @@ describe('PlannerPage', () => {
     expect(screen.getByText('저장되지 않은 변경 사항')).toBeInTheDocument()
   })
 
-  it('삭제 버튼 클릭 한 번으로 draft 블록을 제거한다', async () => {
+  it('삭제 버튼 클릭 시 확인 단계를 거쳐 draft 블록을 제거한다', async () => {
     const user = userEvent.setup()
 
     renderWithQueryClient(<PlannerPage initialWeekStart="2026-05-18" />)
@@ -336,15 +336,41 @@ describe('PlannerPage', () => {
     )
     await user.click(screen.getByRole('button', { name: '삭제' }))
 
+    const confirmDialog = screen.getByRole('alertdialog')
+    expect(
+      within(confirmDialog).getByText("'React 상태 관리'를 삭제할까요?"),
+    ).toBeInTheDocument()
+    expect(within(confirmDialog).getByRole('button', { name: '취소' })).toHaveFocus()
+    expect(screen.getByText('월요일 · 09:00 - 10:30')).toBeInTheDocument()
+
+    await user.click(within(confirmDialog).getByRole('button', { name: '삭제' }))
+
     expect(screen.queryByText('월요일 · 09:00 - 10:30')).not.toBeInTheDocument()
-    expect(screen.queryByText('이 학습 블록을 삭제할까요?')).not.toBeInTheDocument()
-    expect(
-      screen.queryByRole('button', { name: '삭제 취소' }),
-    ).not.toBeInTheDocument()
-    expect(
-      screen.queryByRole('button', { name: '삭제 확정' }),
-    ).not.toBeInTheDocument()
     expect(screen.getByText('저장되지 않은 변경 사항')).toBeInTheDocument()
+  })
+
+  it('삭제 확인 단계에서 취소하면 블록이 유지된다', async () => {
+    const user = userEvent.setup()
+
+    renderWithQueryClient(<PlannerPage initialWeekStart="2026-05-18" />)
+
+    await user.click(
+      await screen.findByRole('button', {
+        name: 'React 상태 관리 09:00 - 10:30 편집',
+      }),
+    )
+    await user.click(screen.getByRole('button', { name: '삭제' }))
+
+    const confirmDialog = screen.getByRole('alertdialog')
+    expect(
+      within(confirmDialog).getByText("'React 상태 관리'를 삭제할까요?"),
+    ).toBeInTheDocument()
+    expect(within(confirmDialog).getByRole('button', { name: '취소' })).toHaveFocus()
+
+    await user.click(within(confirmDialog).getByRole('button', { name: '취소' }))
+
+    expect(screen.getByText('월요일 · 09:00 - 10:30')).toBeInTheDocument()
+    expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument()
   })
 
   it('종료 시간이 시작 시간보다 늦지 않으면 draft에 반영하지 않는다', async () => {
