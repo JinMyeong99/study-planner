@@ -1,5 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { render, screen, within } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { http, HttpResponse } from 'msw'
 import type { ReactElement } from 'react'
 import { describe, expect, it } from 'vitest'
@@ -59,6 +60,36 @@ describe('PlannerPage', () => {
     expect(within(grid).getByText('09:00 - 10:30')).toBeInTheDocument()
     expect(within(grid).getByText('TypeScript 기초')).toBeInTheDocument()
     expect(within(grid).getByText('14:00 - 16:00')).toBeInTheDocument()
+    expect(
+      within(grid).queryByText('상태와 서버 상태 분리 복습'),
+    ).not.toBeInTheDocument()
+  })
+
+  it('모바일 요일 전환을 위한 요일 탭 상태를 변경한다', async () => {
+    const user = userEvent.setup()
+
+    renderWithQueryClient(<PlannerPage initialWeekStart="2026-05-18" />)
+
+    await screen.findByRole('region', {
+      name: '주간 시간 그리드',
+    })
+
+    expect(screen.getByRole('tab', { name: '월' })).toHaveAttribute(
+      'aria-selected',
+      'true',
+    )
+
+    await user.click(screen.getByRole('tab', { name: '수' }))
+
+    expect(screen.getByRole('tab', { name: '월' })).toHaveAttribute(
+      'aria-selected',
+      'false',
+    )
+    expect(screen.getByRole('tab', { name: '수' })).toHaveAttribute(
+      'aria-selected',
+      'true',
+    )
+    expect(screen.getByLabelText('수요일')).toHaveClass('is-selected')
   })
 
   it('저장된 블록이 없는 주차는 빈 상태를 렌더링한다', async () => {
