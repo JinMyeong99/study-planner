@@ -90,8 +90,8 @@ export const PlannerWeekGrid = ({
               role="tab"
               type="button"
             >
-              <span className="planner-week-grid__day-label">{weekday}</span>
-              <span className="planner-week-grid__date-label">{dateLabel}</span>
+              <span aria-hidden="true" className="planner-week-grid__day-label">{weekday}</span>
+              <span aria-hidden="true" className="planner-week-grid__date-label">{dateLabel}</span>
             </button>
           )
         })}
