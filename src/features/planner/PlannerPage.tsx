@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { PlannerApiError, savePlanner } from './api'
@@ -8,7 +8,6 @@ import {
   type PlannerBlockFormValues,
 } from './PlannerBlockModal'
 import {
-  addWeeksToLocalDate,
   formatLocalDate,
   getWeekDateRangeLabel,
   getWeekStartDate,
@@ -24,9 +23,11 @@ import {
   formatConflictMessage,
   getConflictBlockIds,
 } from './utils/save'
+import { useAutoCloseToast } from './hooks/useAutoCloseToast'
 import { useEditablePlannerState } from './hooks/useEditablePlannerState'
 import { usePlannerData } from './hooks/usePlannerData'
 import { useUnsavedChangesWarning } from './hooks/useUnsavedChangesWarning'
+import { useWeekNavigation } from './hooks/useWeekNavigation'
 import { PlannerSummary } from './PlannerSummary'
 import { PlannerWeekGrid } from './PlannerWeekGrid'
 import type { StudyBlock } from './types'
@@ -48,13 +49,6 @@ type PlannerModalState =
       initialValues: PlannerBlockFormValues
     }
 
-type SaveFeedback =
-  | {
-      message: string
-      type: 'success' | 'error'
-    }
-  | null
-
 const WEEK_CHANGE_CONFIRM_TITLE = '저장되지 않은 변경 사항이 있습니다'
 const WEEK_CHANGE_CONFIRM_DESCRIPTION =
   '다른 주로 이동하면 현재 주의 변경 사항이 사라집니다.'
@@ -71,15 +65,12 @@ const getSaveErrorMessage = (error: unknown) => {
 
 export const PlannerPage = ({ initialWeekStart }: PlannerPageProps) => {
   const [modalState, setModalState] = useState<PlannerModalState | null>(null)
-  const [saveFeedback, setSaveFeedback] = useState<SaveFeedback>(null)
-  const [isToastDismissing, setIsToastDismissing] = useState(false)
+  const { toast, isDismissing, setToast, dismiss, clearToast } = useAutoCloseToast()
   const queryClient = useQueryClient()
   const defaultWeekStart = useMemo(() => getCurrentWeekStart(), [])
   const [weekStart, setWeekStart] = useState(
     () => initialWeekStart ?? defaultWeekStart,
   )
-  const [pendingWeekStart, setPendingWeekStart] = useState<string | null>(null)
-  const keepEditingButtonRef = useRef<HTMLButtonElement>(null)
   const plannerData = usePlannerData(weekStart)
   const isPlannerReady = !plannerData.isLoading && !plannerData.isError
   const editablePlanner = useEditablePlannerState({
@@ -106,35 +97,27 @@ export const PlannerPage = ({ initialWeekStart }: PlannerPageProps) => {
         response,
       )
       editablePlanner.resetDraft()
-      setSaveFeedback({
-        message: '저장되었습니다.',
-        type: 'success',
-      })
+      setToast({ message: '저장되었습니다.', type: 'success' })
     },
     onError: (error) => {
-      setSaveFeedback({
-        message: getSaveErrorMessage(error),
-        type: 'error',
-      })
+      setToast({ message: getSaveErrorMessage(error), type: 'error' })
     },
   })
-  const dismissToast = () => {
-    setIsToastDismissing(true)
-    setTimeout(() => {
-      setSaveFeedback(null)
-      setIsToastDismissing(false)
-    }, 180)
+  const clearTransientPlannerUi = () => {
+    setModalState(null)
+    clearToast()
   }
-  useEffect(() => {
-    if (saveFeedback?.type !== 'success') return
-    const timer = setTimeout(dismissToast, 3000)
-    return () => clearTimeout(timer)
-  }, [saveFeedback])
-  useEffect(() => {
-    if (!pendingWeekStart) return
-
-    keepEditingButtonRef.current?.focus()
-  }, [pendingWeekStart])
+  const { pendingWeekStart, keepEditingButtonRef, handleWeekChange, cancelWeekChange, confirmWeekChange } =
+    useWeekNavigation({
+      weekStart,
+      isDirty: editablePlanner.isDirty,
+      isPending: saveMutation.isPending,
+      onResetDraft: editablePlanner.resetDraft,
+      onMoveToWeek: (nextWeekStart) => {
+        clearTransientPlannerUi()
+        setWeekStart(nextWeekStart)
+      },
+    })
   const canShowPlannerContent = isPlannerReady && editablePlanner.isReady
   const canSavePlanner =
     canShowPlannerContent && editablePlanner.isDirty && !saveMutation.isPending
@@ -144,7 +127,7 @@ export const PlannerPage = ({ initialWeekStart }: PlannerPageProps) => {
   }
 
   const handleModalSubmit = (values: PlannerBlockFormValues) => {
-    setSaveFeedback(null)
+    setToast(null)
 
     const nextBlockValues = {
       courseId: values.courseId,
@@ -166,50 +149,8 @@ export const PlannerPage = ({ initialWeekStart }: PlannerPageProps) => {
     closeModal()
   }
 
-  const clearTransientPlannerUi = () => {
-    setModalState(null)
-    setSaveFeedback(null)
-    setIsToastDismissing(false)
-  }
-
-  const moveToWeek = (nextWeekStart: string) => {
-    clearTransientPlannerUi()
-    setWeekStart(nextWeekStart)
-  }
-
-  const handleWeekChange = (amount: number) => {
-    if (saveMutation.isPending) {
-      return
-    }
-
-    const nextWeekStart = addWeeksToLocalDate(weekStart, amount)
-
-    if (editablePlanner.isDirty) {
-      setPendingWeekStart(nextWeekStart)
-      return
-    }
-
-    moveToWeek(nextWeekStart)
-  }
-
-  const cancelWeekChange = () => {
-    setPendingWeekStart(null)
-  }
-
-  const confirmWeekChange = () => {
-    if (!pendingWeekStart) {
-      return
-    }
-
-    const nextWeekStart = pendingWeekStart
-
-    editablePlanner.resetDraft()
-    setPendingWeekStart(null)
-    moveToWeek(nextWeekStart)
-  }
-
   const handleModalDelete = () => {
-    setSaveFeedback(null)
+    setToast(null)
 
     if (modalState?.mode !== 'edit') {
       return
@@ -225,7 +166,7 @@ export const PlannerPage = ({ initialWeekStart }: PlannerPageProps) => {
     }
 
     if (conflictPair) {
-      setSaveFeedback({
+      setToast({
         message: formatConflictMessage(conflictPair, plannerData.courses),
         type: 'error',
       })
@@ -360,19 +301,19 @@ export const PlannerPage = ({ initialWeekStart }: PlannerPageProps) => {
         </div>
       ) : null}
 
-      {saveFeedback ? (
+      {toast ? (
         <div
-          className={`planner-toast planner-toast--${saveFeedback.type}${isToastDismissing ? ' is-dismissing' : ''}`}
-          role={saveFeedback.type === 'error' ? 'alert' : 'status'}
+          className={`planner-toast planner-toast--${toast.type}${isDismissing ? ' is-dismissing' : ''}`}
+          role={toast.type === 'error' ? 'alert' : 'status'}
         >
           <em aria-hidden="true" className="planner-toast__icon">
-            {saveFeedback.type === 'success' ? '✓' : '!'}
+            {toast.type === 'success' ? '✓' : '!'}
           </em>
-          <span className="planner-toast__message">{saveFeedback.message}</span>
+          <span className="planner-toast__message">{toast.message}</span>
           <button
             aria-label="닫기"
             className="planner-toast__close"
-            onClick={dismissToast}
+            onClick={dismiss}
             type="button"
           >
             ×
