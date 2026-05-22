@@ -30,10 +30,15 @@ const gridStyle = {
 
 const getCourseBackground = (color: string) => `${color}1f`
 
-const getBlocksByDay = (blocks: StudyBlock[]) =>
-  PLANNER_WEEKDAY_LABELS.map((_, dayOfWeek) =>
-    blocks.filter((block) => block.dayOfWeek === dayOfWeek),
-  )
+const getBlocksByDay = (blocks: StudyBlock[]) => {
+  const byDay: StudyBlock[][] = Array.from({ length: 7 }, () => [])
+
+  for (const block of blocks) {
+    byDay[block.dayOfWeek].push(block)
+  }
+
+  return byDay
+}
 
 const getBlockClassName = (durationMinutes: number, hasMemo: boolean) =>
   [
