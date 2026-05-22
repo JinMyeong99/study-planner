@@ -50,3 +50,22 @@ export interface ErrorResponse {
   code: PlannerErrorCode
   message: string
 }
+
+export interface PlannerBlockFormValues {
+  courseId: string
+  dayOfWeek: number
+  startTime: string
+  endTime: string
+  memo: string
+}
+
+export type PlannerModalState =
+  | {
+      mode: 'create'
+      initialValues: PlannerBlockFormValues
+    }
+  | {
+      block: StudyBlock
+      mode: 'edit'
+      initialValues: PlannerBlockFormValues
+    }

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 
-import type { Course, StudyBlock } from './types'
+import type { Course, PlannerBlockFormValues, StudyBlock } from './types'
 import { createCourseMap } from './utils/course'
 import {
   createCourseOptions,
@@ -11,13 +11,7 @@ import {
 import { MAX_MEMO_LENGTH, getValidationMessage } from './utils/validation'
 import { PlannerSelect } from './PlannerSelect'
 
-export interface PlannerBlockFormValues {
-  courseId: string
-  dayOfWeek: number
-  startTime: string
-  endTime: string
-  memo: string
-}
+export type { PlannerBlockFormValues }
 
 interface PlannerBlockModalProps {
   blocks: StudyBlock[]

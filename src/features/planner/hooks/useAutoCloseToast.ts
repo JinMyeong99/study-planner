@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
 
+import { TOAST_AUTO_CLOSE_MS, TOAST_DISMISS_MS } from '../constants'
+
 type ToastState =
   | {
       message: string
@@ -16,7 +18,7 @@ export const useAutoCloseToast = () => {
     setTimeout(() => {
       setToast(null)
       setIsDismissing(false)
-    }, 180)
+    }, TOAST_DISMISS_MS)
   }
 
   const clearToast = () => {
@@ -26,7 +28,7 @@ export const useAutoCloseToast = () => {
 
   useEffect(() => {
     if (toast?.type !== 'success') return
-    const timer = setTimeout(dismiss, 3000)
+    const timer = setTimeout(dismiss, TOAST_AUTO_CLOSE_MS)
     return () => clearTimeout(timer)
   }, [toast])
 
