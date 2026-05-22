@@ -262,49 +262,6 @@
   line-height: 1.5;
 }
 
-.planner-week-change-confirm-backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 40;
-  display: grid;
-  place-items: center;
-  padding: 24px;
-  background: rgba(18, 27, 47, 0.42);
-}
-
-.planner-week-change-confirm {
-  display: grid;
-  gap: 12px;
-  width: min(360px, 100%);
-  padding: 24px;
-  border-radius: 20px;
-  background: #ffffff;
-  box-shadow:
-    0 4px 6px rgba(18, 27, 47, 0.06),
-    0 12px 32px rgba(18, 27, 47, 0.18);
-}
-
-.planner-week-change-confirm strong {
-  color: #172033;
-  font-size: 1rem;
-  line-height: 1.4;
-}
-
-.planner-week-change-confirm p {
-  margin: 0;
-  color: #667085;
-  font-size: 0.92rem;
-  font-weight: 600;
-  line-height: 1.55;
-}
-
-.planner-week-change-confirm__actions {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  gap: 8px;
-  margin-top: 4px;
-}
 
 @media (max-width: 1279px) {
   .planner-page {

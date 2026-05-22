@@ -25,6 +25,7 @@ import { useEditablePlannerState } from './hooks/useEditablePlannerState'
 import { usePlannerData } from './hooks/usePlannerData'
 import { useUnsavedChangesWarning } from './hooks/useUnsavedChangesWarning'
 import { useWeekNavigation } from './hooks/useWeekNavigation'
+import { ConfirmDialog } from './ConfirmDialog'
 import { PlannerSummary } from './PlannerSummary'
 import { PlannerWeekGrid } from './PlannerWeekGrid'
 import type { PlannerBlockFormValues, PlannerModalState } from './types'
@@ -94,7 +95,7 @@ export const PlannerPage = ({ initialWeekStart }: PlannerPageProps) => {
     setModalState(null)
     clearToast()
   }
-  const { pendingWeekStart, keepEditingButtonRef, handleWeekChange, cancelWeekChange, confirmWeekChange } =
+  const { pendingWeekStart, handleWeekChange, cancelWeekChange, confirmWeekChange } =
     useWeekNavigation({
       weekStart,
       isDirty: editablePlanner.isDirty,
@@ -306,43 +307,14 @@ export const PlannerPage = ({ initialWeekStart }: PlannerPageProps) => {
       ) : null}
 
       {pendingWeekStart ? (
-        <div
-          className="planner-week-change-confirm-backdrop"
-          onClick={cancelWeekChange}
-        >
-          <div
-            className="planner-week-change-confirm"
-            role="alertdialog"
-            aria-modal="true"
-            aria-labelledby="week-change-confirm-title"
-            aria-describedby="week-change-confirm-description"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <strong id="week-change-confirm-title">
-              {WEEK_CHANGE_CONFIRM_TITLE}
-            </strong>
-            <p id="week-change-confirm-description">
-              {WEEK_CHANGE_CONFIRM_DESCRIPTION}
-            </p>
-            <div className="planner-week-change-confirm__actions">
-              <button
-                ref={keepEditingButtonRef}
-                className="planner-modal__secondary-button"
-                onClick={cancelWeekChange}
-                type="button"
-              >
-                계속 편집
-              </button>
-              <button
-                className="planner-modal__danger-button"
-                onClick={confirmWeekChange}
-                type="button"
-              >
-                변경 버리고 이동
-              </button>
-            </div>
-          </div>
-        </div>
+        <ConfirmDialog
+          cancelLabel="계속 편집"
+          confirmLabel="변경 버리고 이동"
+          description={WEEK_CHANGE_CONFIRM_DESCRIPTION}
+          title={WEEK_CHANGE_CONFIRM_TITLE}
+          onCancel={cancelWeekChange}
+          onConfirm={confirmWeekChange}
+        />
       ) : null}
 
       {modalState ? (
