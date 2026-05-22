@@ -17,16 +17,16 @@ export const PlannerBlockList = ({
   courses,
   onBlockSelect,
 }: PlannerBlockListProps) => {
-  const courseMap = createCourseMap(courses)
-  const sortedBlocks = sortPlannerBlocks(blocks)
-
-  if (sortedBlocks.length === 0) {
+  if (blocks.length === 0) {
     return (
       <div className="planner-empty-state">
         <strong>강의를 추가해 주세요.</strong>
       </div>
     )
   }
+
+  const courseMap = createCourseMap(courses)
+  const sortedBlocks = sortPlannerBlocks(blocks)
 
   return (
     <ul className="planner-block-list">
