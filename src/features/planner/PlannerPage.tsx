@@ -2,21 +2,23 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { PlannerApiError, savePlanner } from './api'
+import { PlannerBlockList } from './PlannerBlockList'
 import {
   PlannerBlockModal,
   type PlannerBlockFormValues,
 } from './PlannerBlockModal'
 import {
   addWeeksToLocalDate,
-  formatDayOfWeek,
   formatLocalDate,
   getWeekDateRangeLabel,
   getWeekStartDate,
 } from './utils/date'
 import { findFirstTimeConflict } from './utils/conflict'
-import { getNextPlannerSlotTime } from './utils/time'
-import { createCourseMap } from './utils/course'
-import { sortPlannerBlocks } from './utils/sort'
+import {
+  createFormValuesFromBlock,
+  createFormValuesFromSlot,
+  getMemoPayload,
+} from './utils/form'
 import {
   createSavePlannerPayload,
   formatConflictMessage,
@@ -27,7 +29,7 @@ import { usePlannerData } from './hooks/usePlannerData'
 import { useUnsavedChangesWarning } from './hooks/useUnsavedChangesWarning'
 import { PlannerSummary } from './PlannerSummary'
 import { PlannerWeekGrid } from './PlannerWeekGrid'
-import type { Course, StudyBlock } from './types'
+import type { StudyBlock } from './types'
 import { plannerQueryKeys } from './queryKeys'
 import './PlannerPage.css'
 
@@ -59,108 +61,12 @@ const WEEK_CHANGE_CONFIRM_DESCRIPTION =
 
 const getCurrentWeekStart = () => formatLocalDate(getWeekStartDate(new Date()))
 
-const createFormValuesFromBlock = (
-  block: StudyBlock,
-): PlannerBlockFormValues => ({
-  courseId: block.courseId,
-  dayOfWeek: block.dayOfWeek,
-  startTime: block.startTime,
-  endTime: block.endTime,
-  memo: block.memo ?? '',
-})
-
-const createFormValuesFromSlot = ({
-  dayOfWeek,
-  startTime,
-}: {
-  dayOfWeek: number
-  startTime: string
-}): PlannerBlockFormValues => ({
-  courseId: '',
-  dayOfWeek,
-  startTime,
-  endTime: getNextPlannerSlotTime(startTime),
-  memo: '',
-})
-
-const getMemoPayload = (memo: string) => {
-  const trimmedMemo = memo.trim()
-
-  return trimmedMemo ? { memo: trimmedMemo } : {}
-}
-
 const getSaveErrorMessage = (error: unknown) => {
   if (error instanceof PlannerApiError) {
     return error.message
   }
 
   return '플래너 저장에 실패했습니다. 다시 시도해 주세요.'
-}
-
-const PlannerBlockList = ({
-  blocks,
-  conflictBlockIds = new Set<string>(),
-  courses,
-  onBlockSelect,
-}: {
-  blocks: StudyBlock[]
-  conflictBlockIds?: Set<string>
-  courses: Course[]
-  onBlockSelect: (block: StudyBlock) => void
-}) => {
-  const courseMap = createCourseMap(courses)
-  const sortedBlocks = sortPlannerBlocks(blocks)
-
-  if (sortedBlocks.length === 0) {
-    return (
-      <div className="planner-empty-state">
-        <strong>강의를 추가해 주세요.</strong>
-      </div>
-    )
-  }
-
-  return (
-    <ul className="planner-block-list">
-      {sortedBlocks.map((block) => {
-        const course = courseMap.get(block.courseId)
-        const hasConflict = conflictBlockIds.has(block.id)
-
-        return (
-          <li key={block.id}>
-            <button
-              aria-label={`${course?.title ?? '알 수 없는 강의'} ${formatDayOfWeek(block.dayOfWeek)}요일 ${block.startTime} - ${block.endTime} 편집`}
-              className={
-                hasConflict
-                  ? 'planner-block-card is-conflict'
-                  : 'planner-block-card'
-              }
-              onClick={() => {
-                onBlockSelect(block)
-              }}
-              type="button"
-            >
-              <span
-                aria-hidden="true"
-                className="planner-block-card__color"
-                style={{ backgroundColor: course?.color ?? '#8f97a8' }}
-              />
-              <span className="planner-block-card__content">
-                <strong>{course?.title ?? '알 수 없는 강의'}</strong>
-                <span>
-                  {formatDayOfWeek(block.dayOfWeek)}요일 · {block.startTime} -{' '}
-                  {block.endTime}
-                </span>
-                {hasConflict ? (
-                  <em className="planner-conflict-badge">시간 충돌</em>
-                ) : null}
-                {block.memo ? <p>{block.memo}</p> : null}
-              </span>
-            </button>
-          </li>
-        )
-      })}
-    </ul>
-  )
 }
 
 export const PlannerPage = ({ initialWeekStart }: PlannerPageProps) => {
