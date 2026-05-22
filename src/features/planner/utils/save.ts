@@ -9,7 +9,7 @@ import { formatDayOfWeek } from './date'
 
 const isDraftBlockId = (blockId: string) => blockId.startsWith('draft-')
 
-const formatBlockSummary = (
+export const formatBlockSummary = (
   block: StudyBlock,
   courseMap: Map<string, Course>,
 ) => {

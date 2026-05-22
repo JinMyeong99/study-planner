@@ -1,8 +1,8 @@
 import type { Course, PlannerBlockFormValues, StudyBlock } from '../types'
 import { areBlocksOverlapping } from './conflict'
 import { createCourseMap } from './course'
-import { formatDayOfWeek } from './date'
 import { isValidPlannerTimeRange } from './time'
+import { formatBlockSummary } from './save'
 
 export const MAX_MEMO_LENGTH = 200
 
@@ -52,10 +52,7 @@ export const getValidationMessage = ({
   const conflictBlock = findConflictBlock(values, blocks, editingBlockId)
 
   if (conflictBlock) {
-    const courseTitle =
-      courseMap.get(conflictBlock.courseId)?.title ?? '알 수 없는 강의'
-
-    return `${courseTitle}(${formatDayOfWeek(conflictBlock.dayOfWeek)}요일 ${conflictBlock.startTime} - ${conflictBlock.endTime})와 시간이 겹칩니다.`
+    return `${formatBlockSummary(conflictBlock, courseMap)}와 시간이 겹칩니다.`
   }
 
   return null

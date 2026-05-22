@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type FormEvent } from 'react'
+import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
 
 import './PlannerBlockModal.css'
 
@@ -40,7 +40,7 @@ export const PlannerBlockModal = ({
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false)
   const cancelDeleteButtonRef = useRef<HTMLButtonElement>(null)
-  const courseMap = createCourseMap(courses)
+  const courseMap = useMemo(() => createCourseMap(courses), [courses])
   const deleteConfirmMessage = `'${courseMap.get(values.courseId)?.title ?? '이 강의'}'를 삭제할까요?`
   const courseOptions = createCourseOptions(courses)
   const memoLength = values.memo.length
