@@ -94,13 +94,16 @@ const PlannerSelect = ({
   const selectRef = useRef<HTMLDivElement>(null)
   const selectedIndex = getSelectedOptionIndex(options, value)
   const [isOpen, setIsOpen] = useState(false)
-  const [activeIndex, setActiveIndex] = useState(0)
+  const [activeIndex, setActiveIndex] = useState(selectedIndex)
   const selectedOption = options[selectedIndex]
-  const orderedOptions =
-    selectedIndex === 0
-      ? options
-      : [options[selectedIndex], ...options.filter((_, i) => i !== selectedIndex)]
   const activeOptionId = `${listboxId}-option-${activeIndex}`
+
+  useEffect(() => {
+    if (!isOpen) return
+    document
+      .getElementById(`${listboxId}-option-${selectedIndex}`)
+      ?.scrollIntoView?.({ block: 'nearest' })
+  }, [isOpen, listboxId, selectedIndex])
 
   useEffect(() => {
     if (!isOpen) return
@@ -119,7 +122,7 @@ const PlannerSelect = ({
   }, [isOpen])
 
   const openListbox = () => {
-    setActiveIndex(0)
+    setActiveIndex(selectedIndex)
     setIsOpen(true)
   }
 
@@ -130,7 +133,7 @@ const PlannerSelect = ({
 
   const moveActiveOption = (amount: number) => {
     setActiveIndex((currentIndex) =>
-      (currentIndex + amount + orderedOptions.length) % orderedOptions.length,
+      (currentIndex + amount + options.length) % options.length,
     )
   }
 
@@ -155,7 +158,7 @@ const PlannerSelect = ({
         return
       }
 
-      selectOption(orderedOptions[activeIndex])
+      selectOption(options[activeIndex])
       return
     }
 
@@ -210,7 +213,7 @@ const PlannerSelect = ({
             id={listboxId}
             role="listbox"
           >
-            {orderedOptions.map((option, optionIndex) => (
+            {options.map((option, optionIndex) => (
               <button
                 aria-selected={option.value === value}
                 className={[
