@@ -94,8 +94,12 @@ const PlannerSelect = ({
   const selectRef = useRef<HTMLDivElement>(null)
   const selectedIndex = getSelectedOptionIndex(options, value)
   const [isOpen, setIsOpen] = useState(false)
-  const [activeIndex, setActiveIndex] = useState(selectedIndex)
+  const [activeIndex, setActiveIndex] = useState(0)
   const selectedOption = options[selectedIndex]
+  const orderedOptions =
+    selectedIndex === 0
+      ? options
+      : [options[selectedIndex], ...options.filter((_, i) => i !== selectedIndex)]
   const activeOptionId = `${listboxId}-option-${activeIndex}`
 
   useEffect(() => {
@@ -115,7 +119,7 @@ const PlannerSelect = ({
   }, [isOpen])
 
   const openListbox = () => {
-    setActiveIndex(selectedIndex)
+    setActiveIndex(0)
     setIsOpen(true)
   }
 
@@ -126,7 +130,7 @@ const PlannerSelect = ({
 
   const moveActiveOption = (amount: number) => {
     setActiveIndex((currentIndex) =>
-      (currentIndex + amount + options.length) % options.length,
+      (currentIndex + amount + orderedOptions.length) % orderedOptions.length,
     )
   }
 
@@ -151,7 +155,7 @@ const PlannerSelect = ({
         return
       }
 
-      selectOption(options[activeIndex])
+      selectOption(orderedOptions[activeIndex])
       return
     }
 
@@ -206,7 +210,7 @@ const PlannerSelect = ({
             id={listboxId}
             role="listbox"
           >
-            {options.map((option, optionIndex) => (
+            {orderedOptions.map((option, optionIndex) => (
               <button
                 aria-selected={option.value === value}
                 className={[
