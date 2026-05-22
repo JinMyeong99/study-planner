@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { lazy, Suspense, useMemo, useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { PlannerApiError, savePlanner } from './api'
@@ -26,7 +26,7 @@ import { usePlannerData } from './hooks/usePlannerData'
 import { useUnsavedChangesWarning } from './hooks/useUnsavedChangesWarning'
 import { useWeekNavigation } from './hooks/useWeekNavigation'
 import { ConfirmDialog } from './components/ConfirmDialog'
-import { PlannerSummary } from './components/PlannerSummary'
+const PlannerSummary = lazy(() => import('./components/PlannerSummary').then(m => ({ default: m.PlannerSummary })))
 import { PlannerWeekGrid } from './components/PlannerWeekGrid'
 import type { PlannerBlockFormValues, PlannerModalState } from './types'
 import { plannerQueryKeys } from './queryKeys'
@@ -257,10 +257,12 @@ export const PlannerPage = ({ initialWeekStart }: PlannerPageProps) => {
           </section>
 
           <div className="planner-side">
-            <PlannerSummary
-              blocks={editablePlanner.draftBlocks}
-              courses={plannerData.courses}
-            />
+            <Suspense fallback={<div className="planner-summary" />}>
+              <PlannerSummary
+                blocks={editablePlanner.draftBlocks}
+                courses={plannerData.courses}
+              />
+            </Suspense>
             <section
               className="planner-panel"
               aria-labelledby="planner-block-list-title"
