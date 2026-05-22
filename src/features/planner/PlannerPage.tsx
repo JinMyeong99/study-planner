@@ -51,7 +51,8 @@ const getSaveErrorMessage = (error: unknown) => {
 
 export const PlannerPage = ({ initialWeekStart }: PlannerPageProps) => {
   const [modalState, setModalState] = useState<PlannerModalState | null>(null)
-  const { toast, isDismissing, setToast, dismiss, clearToast } = useAutoCloseToast()
+  const { toast, isDismissing, setToast, dismiss, clearToast } =
+    useAutoCloseToast()
   const queryClient = useQueryClient()
   const defaultWeekStart = useMemo(() => getCurrentWeekStart(), [])
   const [weekStart, setWeekStart] = useState(
@@ -113,7 +114,7 @@ export const PlannerPage = ({ initialWeekStart }: PlannerPageProps) => {
   }
 
   const handleModalSubmit = (values: PlannerBlockFormValues) => {
-    setToast(null)
+    clearToast()
 
     const nextBlockValues = {
       courseId: values.courseId,
@@ -136,7 +137,7 @@ export const PlannerPage = ({ initialWeekStart }: PlannerPageProps) => {
   }
 
   const handleModalDelete = () => {
-    setToast(null)
+    clearToast()
 
     if (modalState?.mode !== 'edit') {
       return
