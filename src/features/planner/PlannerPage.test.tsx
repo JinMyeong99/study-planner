@@ -309,6 +309,26 @@ describe('PlannerPage', () => {
     expect(getPlannerSelect('강의')).toHaveTextContent('React 상태 관리')
   })
 
+  it('편집 모달에서 선택 리스트를 열면 현재 선택값이 첫 번째 항목으로 표시된다', async () => {
+    const user = userEvent.setup()
+
+    useStoredPlannerBlocks()
+
+    renderWithQueryClient(<PlannerPage initialWeekStart="2026-05-18" />)
+
+    await user.click(
+      await screen.findByRole('button', {
+        name: 'React 상태 관리 09:00 - 10:30 편집',
+      }),
+    )
+
+    await user.click(getPlannerSelect('시작 시간'))
+
+    const options = screen.getAllByRole('option')
+    expect(options[0]).toHaveTextContent('09:00')
+    expect(options[0]).toHaveAttribute('aria-selected', 'true')
+  })
+
   it('추가 모달 확인 시 draft 블록을 추가하고 dirty 상태가 된다', async () => {
     const user = userEvent.setup()
 
