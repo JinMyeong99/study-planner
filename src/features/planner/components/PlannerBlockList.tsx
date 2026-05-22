@@ -1,9 +1,9 @@
 import './PlannerBlockList.css'
-import { PLANNER_BLOCK_FALLBACK_COLOR } from './constants'
-import type { Course, StudyBlock } from './types'
-import { createCourseMap } from './utils/blocks'
-import { formatDayOfWeek } from './utils/date'
-import { sortPlannerBlocks } from './utils/blocks'
+import { PLANNER_BLOCK_FALLBACK_COLOR } from '../constants'
+import type { Course, StudyBlock } from '../types'
+import { createCourseMap } from '../utils/blocks'
+import { formatDayOfWeek } from '../utils/date'
+import { sortPlannerBlocks } from '../utils/blocks'
 
 interface PlannerBlockListProps {
   blocks: StudyBlock[]

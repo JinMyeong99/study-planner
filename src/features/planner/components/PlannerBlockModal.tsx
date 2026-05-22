@@ -3,15 +3,15 @@ import { useMemo, useState, type FormEvent } from 'react'
 import './PlannerBlockModal.css'
 
 import { ConfirmDialog } from './ConfirmDialog'
-import type { Course, PlannerBlockFormValues, StudyBlock } from './types'
-import { createCourseMap } from './utils/blocks'
+import type { Course, PlannerBlockFormValues, StudyBlock } from '../types'
+import { createCourseMap } from '../utils/blocks'
 import {
   createCourseOptions,
   endTimeSelectOptions,
   startTimeSelectOptions,
   weekdayOptions,
-} from './utils/options'
-import { MAX_MEMO_LENGTH, getValidationMessage } from './utils/validation'
+} from '../utils/options'
+import { MAX_MEMO_LENGTH, getValidationMessage } from '../utils/validation'
 import { PlannerSelect } from './PlannerSelect'
 
 export type { PlannerBlockFormValues }
