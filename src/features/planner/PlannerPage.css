@@ -2,7 +2,7 @@
   min-height: 100vh;
   padding: 48px;
   background:
-    radial-gradient(circle at top left, rgba(20, 99, 255, 0.14), transparent 34rem),
+    radial-gradient(circle at top left, rgba(252, 17, 80, 0.14), transparent 34rem),
     linear-gradient(135deg, var(--planner-bg) 0%, var(--planner-bg-accent) 100%);
 }
 
@@ -15,7 +15,7 @@
   background: var(--planner-primary);
   color: var(--planner-surface);
   font-weight: 800;
-  box-shadow: 0 10px 22px rgba(20, 99, 255, 0.22);
+  box-shadow: 0 10px 22px rgba(252, 17, 80, 0.22);
 }
 
 .planner-save-button:hover,
@@ -23,7 +23,7 @@
   background: var(--planner-primary-strong);
   box-shadow:
     0 0 0 4px var(--planner-primary-tint),
-    0 10px 22px rgba(20, 99, 255, 0.24);
+    0 10px 22px rgba(252, 17, 80, 0.24);
   outline: none;
 }
 

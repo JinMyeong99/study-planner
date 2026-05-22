@@ -15,7 +15,7 @@
   display: grid;
   place-items: center;
   padding: 32px;
-  border: 1px dashed rgba(20, 99, 255, 0.24);
+  border: 1px dashed rgba(252, 17, 80, 0.24);
   border-radius: 20px;
   background: linear-gradient(135deg, var(--planner-primary-soft), var(--planner-surface));
   color: var(--planner-text-muted);
@@ -57,7 +57,7 @@
 
 .planner-block-card:hover,
 .planner-block-card:focus-visible {
-  border-color: rgba(20, 99, 255, 0.28);
+  border-color: rgba(252, 17, 80, 0.28);
   box-shadow: 0 12px 28px rgba(32, 43, 68, 0.08);
   outline: none;
 }

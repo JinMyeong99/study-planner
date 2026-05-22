@@ -259,7 +259,7 @@
   }
 
   .planner-week-grid__day-tab[aria-selected='true'] {
-    border-color: rgba(20, 99, 255, 0.38);
+    border-color: rgba(252, 17, 80, 0.38);
     background: var(--planner-primary-soft);
     color: var(--planner-primary-strong);
   }
