@@ -45,7 +45,6 @@ const getBlockClassName = (durationMinutes: number, hasMemo: boolean) =>
   [
     'planner-week-grid__block',
     durationMinutes <= 30 ? 'is-compact' : '',
-    durationMinutes >= 60 && hasMemo ? 'has-memo-preview' : '',
     durationMinutes >= 90 && hasMemo ? 'has-large-memo-preview' : '',
   ]
     .filter(Boolean)

@@ -190,13 +190,13 @@ export const PlannerBlockModal = ({
         </form>
       </section>
 
-      {isConfirmingDelete ? (
+      {isConfirmingDelete && onDelete ? (
         <ConfirmDialog
           cancelLabel="취소"
           confirmLabel="삭제"
           title={deleteConfirmMessage}
           onCancel={() => setIsConfirmingDelete(false)}
-          onConfirm={onDelete!}
+          onConfirm={onDelete}
         />
       ) : null}
     </div>
