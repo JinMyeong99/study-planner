@@ -1,3 +1,4 @@
+import './PlannerBlockList.css'
 import type { Course, StudyBlock } from './types'
 import { createCourseMap } from './utils/course'
 import { formatDayOfWeek } from './utils/date'

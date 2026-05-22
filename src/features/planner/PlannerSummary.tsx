@@ -1,4 +1,6 @@
 import { useMemo } from 'react'
+
+import './PlannerSummary.css'
 import {
   Bar,
   BarChart,
