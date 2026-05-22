@@ -1016,6 +1016,16 @@
   }
 
   .planner-side {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 920px) {
+  .planner-page {
+    padding: 28px 18px;
+  }
+
+  .planner-side {
     grid-template-columns: 1fr;
   }
 
@@ -1065,12 +1075,6 @@
   .planner-week-grid__block {
     right: 8px;
     left: 8px;
-  }
-}
-
-@media (max-width: 920px) {
-  .planner-page {
-    padding: 28px 18px;
   }
 
   .planner-summary {
