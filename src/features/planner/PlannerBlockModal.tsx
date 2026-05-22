@@ -102,7 +102,7 @@ const PlannerSelect = ({
     if (!isOpen) return
     document
       .getElementById(`${listboxId}-option-${selectedIndex}`)
-      ?.scrollIntoView?.({ block: 'nearest' })
+      ?.scrollIntoView?.({ block: 'start' })
   }, [isOpen, listboxId, selectedIndex])
 
   useEffect(() => {
