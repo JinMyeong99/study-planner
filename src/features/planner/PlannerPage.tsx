@@ -192,7 +192,7 @@ export const PlannerPage = ({ initialWeekStart }: PlannerPageProps) => {
 
       {canShowPlannerContent ? (
         <div className="planner-layout">
-          <section className="planner-panel" aria-labelledby="planner-grid-title">
+          <section className="planner-panel planner-panel--primary" aria-labelledby="planner-grid-title">
             <div className="planner-panel__header planner-panel__header--with-navigation">
               <div className="planner-panel__title">
                 <h2 id="planner-grid-title">주간 학습 플래너</h2>

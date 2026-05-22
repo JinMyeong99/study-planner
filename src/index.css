@@ -1,8 +1,37 @@
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.css');
+
 :root {
   font-family:
-    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  color: #172033;
-  background: #f7f8fb;
+    'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --planner-bg: #f7f7f8;
+  --planner-bg-accent: #f0f0f1;
+  --planner-surface: #ffffff;
+  --planner-surface-soft: #f7f7f8;
+  --planner-text: #172033;
+  --planner-text-muted: #667085;
+  --planner-text-subtle: #98a2b3;
+  --planner-line: rgba(18, 27, 47, 0.09);
+  --planner-line-strong: rgba(18, 27, 47, 0.14);
+  --planner-primary: #FC1150;
+  --planner-primary-strong: #D40D45;
+  --planner-primary-soft: #FFF0F3;
+  --planner-primary-tint: rgba(252, 17, 80, 0.12);
+  --planner-primary-hover: #FFD6E0;
+  --planner-danger: #b42335;
+  --planner-danger-soft: #fff1f3;
+  --planner-success: #1a6640;
+  --planner-success-soft: #edfaf4;
+  --planner-text-strong:     #344054;
+  --planner-text-mid:        #475467;
+  --planner-danger-hover:    #ffe4e8;
+  --planner-surface-neutral: #f2f4f7;
+  --planner-danger-strong:   #8d1f2d;
+  --planner-line-disabled:   #d0d5dd;
+  --planner-shadow-panel: 0 18px 48px rgba(30, 45, 85, 0.09);
+  --planner-shadow-popover: 0 18px 44px rgba(18, 27, 47, 0.18);
+
+  color: var(--planner-text);
+  background: var(--planner-bg);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -44,18 +73,18 @@ button {
 }
 
 .startup-error strong {
-  color: #b42335;
+  color: var(--planner-danger);
   font-size: 1.35rem;
 }
 
 .startup-error p {
-  color: #526070;
+  color: var(--planner-text-muted);
   line-height: 1.7;
 }
 
 .startup-error code {
   border-radius: 6px;
   padding: 2px 6px;
-  background: #eef2f8;
-  color: #172033;
+  background: var(--planner-primary-soft);
+  color: var(--planner-text);
 }

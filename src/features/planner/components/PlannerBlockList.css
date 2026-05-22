@@ -3,8 +3,8 @@
   width: fit-content;
   border-radius: 999px;
   padding: 3px 8px;
-  background: #fff1f3;
-  color: #b42335;
+  background: var(--planner-danger-soft);
+  color: var(--planner-danger);
   font-size: 0.68rem;
   font-style: normal;
   font-weight: 900;
@@ -15,15 +15,15 @@
   display: grid;
   place-items: center;
   padding: 32px;
-  border: 1px dashed rgba(71, 97, 121, 0.28);
-  border-radius: 22px;
-  background: linear-gradient(135deg, rgba(247, 248, 251, 0.92), #ffffff);
-  color: #667085;
+  border: 1px dashed rgba(252, 17, 80, 0.24);
+  border-radius: 20px;
+  background: linear-gradient(135deg, var(--planner-primary-soft), var(--planner-surface));
+  color: var(--planner-text-muted);
   text-align: center;
 }
 
 .planner-empty-state strong {
-  color: #667085;
+  color: var(--planner-text);
   font-size: 1.05rem;
   font-weight: 700;
 }
@@ -47,9 +47,9 @@
   width: 100%;
   gap: 14px;
   padding: 14px;
-  border: 1px solid rgba(18, 27, 47, 0.08);
+  border: 1px solid var(--planner-line);
   border-radius: 18px;
-  background: #ffffff;
+  background: var(--planner-surface);
   color: inherit;
   font: inherit;
   text-align: left;
@@ -57,13 +57,14 @@
 
 .planner-block-card:hover,
 .planner-block-card:focus-visible {
-  border-color: rgba(74, 144, 217, 0.3);
+  border-color: rgba(252, 17, 80, 0.28);
   box-shadow: 0 12px 28px rgba(32, 43, 68, 0.08);
+  outline: none;
 }
 
 .planner-block-card.is-conflict {
   border-color: rgba(180, 35, 53, 0.34);
-  background: #fffafa;
+  background: var(--planner-danger-soft);
 }
 
 .planner-block-card__color {
@@ -78,13 +79,13 @@
 }
 
 .planner-block-card__content strong {
-  color: #172033;
+  color: var(--planner-text);
 }
 
 .planner-block-card__content span,
 .planner-block-card__content p {
   margin: 0;
-  color: #667085;
+  color: var(--planner-text-muted);
   font-size: 0.82rem;
   line-height: 1.5;
 }

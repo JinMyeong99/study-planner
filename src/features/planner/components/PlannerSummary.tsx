@@ -1,6 +1,8 @@
 import { useMemo } from 'react'
 
 import './PlannerSummary.css'
+
+const PLANNER_PRIMARY_COLOR = '#FC1150'
 import {
   Bar,
   BarChart,
@@ -141,7 +143,7 @@ export const PlannerSummary = ({ blocks, courses }: PlannerSummaryProps) => {
                     axisLine={false}
                     tickLine={false}
                   />
-                  <Bar dataKey="minutes" radius={[0, 4, 4, 0]} fill="#4a90d9" />
+                  <Bar dataKey="minutes" radius={[0, 4, 4, 0]} fill={PLANNER_PRIMARY_COLOR} />
                   <Tooltip
                     formatter={(value) => [
                       typeof value === 'number'
