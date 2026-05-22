@@ -1,9 +1,7 @@
 .planner-page {
   min-height: 100vh;
   padding: 48px;
-  background:
-    radial-gradient(ellipse at top left, rgba(252, 17, 80, 0.09) 0%, transparent 50%),
-    var(--planner-bg);
+  background: var(--planner-bg);
 }
 
 

@@ -6,10 +6,15 @@
   box-shadow: var(--planner-shadow-panel);
 }
 
+.planner-summary .planner-panel__header h2 {
+  font-size: 1.2rem;
+}
+
 .planner-summary__total {
   color: var(--planner-text);
-  font-size: 1rem;
+  font-size: 0.9rem;
   font-weight: 800;
+  white-space: nowrap;
 }
 
 .planner-summary__empty {
@@ -29,8 +34,8 @@
 
 .planner-summary__label {
   margin: 0 0 12px;
-  color: var(--planner-primary-strong);
-  font-size: 0.82rem;
+  color: var(--planner-text-muted);
+  font-size: 1rem;
   font-weight: 800;
   letter-spacing: 0.04em;
   text-transform: uppercase;

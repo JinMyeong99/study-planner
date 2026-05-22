@@ -13,7 +13,7 @@
   border: 1px solid var(--planner-line);
   border-bottom: 0;
   border-radius: 18px 18px 0 0;
-  background: linear-gradient(160deg, var(--planner-surface) 0%, var(--planner-primary-soft) 100%);
+  background: var(--planner-surface);
 }
 
 .planner-week-grid__header strong {
@@ -63,7 +63,7 @@
   right: 0;
   left: 0;
   transform: translateY(-50%);
-  color: var(--planner-text-subtle);
+  color: var(--planner-text-muted);
   font-size: 0.78rem;
   text-align: center;
 }
@@ -164,7 +164,7 @@
   padding: 9px;
   border: 1px solid color-mix(in srgb, var(--planner-block-color) 42%, white);
   border-radius: 14px;
-  background: linear-gradient(135deg, var(--planner-block-bg), var(--planner-surface) 92%);
+  background: var(--planner-block-bg);
   box-shadow: 0 12px 22px rgba(32, 43, 68, 0.1);
   color: inherit;
   font: inherit;
@@ -180,7 +180,7 @@
 
 .planner-week-grid__block.is-conflict {
   border-color: rgba(180, 35, 53, 0.52);
-  background: linear-gradient(135deg, var(--planner-danger-soft), var(--planner-surface) 92%);
+  background: var(--planner-danger-soft);
   box-shadow: 0 14px 30px rgba(180, 35, 53, 0.16);
 }
 
