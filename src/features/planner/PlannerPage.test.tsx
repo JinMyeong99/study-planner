@@ -30,6 +30,18 @@ const dispatchBeforeUnloadEvent = () => {
   return event
 }
 
+const getPlannerSelect = (name: string) =>
+  screen.getByRole('combobox', { name: new RegExp(name) })
+
+const selectPlannerOption = async (
+  user: ReturnType<typeof userEvent.setup>,
+  selectName: string,
+  optionName: string,
+) => {
+  await user.click(getPlannerSelect(selectName))
+  await user.click(screen.getByRole('option', { name: optionName }))
+}
+
 describe('PlannerPage', () => {
   it('저장된 주간 블록을 렌더링한다', async () => {
     renderWithQueryClient(<PlannerPage initialWeekStart="2026-05-18" />)
@@ -148,7 +160,7 @@ describe('PlannerPage', () => {
         name: '월요일 10:30 학습 블록 추가',
       }),
     )
-    await user.selectOptions(screen.getByLabelText('강의'), 'course-react')
+    await selectPlannerOption(user, '강의', 'React 상태 관리')
     await user.click(screen.getByRole('button', { name: '확인' }))
     await user.click(screen.getByRole('button', { name: '다음 주로 이동' }))
 
@@ -186,7 +198,7 @@ describe('PlannerPage', () => {
         name: '월요일 10:30 학습 블록 추가',
       }),
     )
-    await user.selectOptions(screen.getByLabelText('강의'), 'course-react')
+    await selectPlannerOption(user, '강의', 'React 상태 관리')
     await user.click(screen.getByRole('button', { name: '확인' }))
     await user.click(screen.getByRole('button', { name: '다음 주로 이동' }))
 
@@ -225,9 +237,30 @@ describe('PlannerPage', () => {
       '×',
     )
     expect(screen.queryByText('로컬 편집')).not.toBeInTheDocument()
-    expect(screen.getByLabelText('요일')).toHaveValue('0')
-    expect(screen.getByLabelText('시작 시간')).toHaveValue('10:30')
-    expect(screen.getByLabelText('종료 시간')).toHaveValue('11:00')
+    expect(getPlannerSelect('강의')).toHaveTextContent('강의 선택')
+    expect(getPlannerSelect('요일')).toHaveTextContent('월요일')
+    expect(getPlannerSelect('시작 시간')).toHaveTextContent('10:30')
+    expect(getPlannerSelect('종료 시간')).toHaveTextContent('11:00')
+    expect(
+      screen.getByPlaceholderText('학습 목표나 메모를 남겨보세요.'),
+    ).toBeInTheDocument()
+  })
+
+  it('커스텀 선택 리스트에서 방향키로 강의를 선택한다', async () => {
+    const user = userEvent.setup()
+
+    renderWithQueryClient(<PlannerPage initialWeekStart="2026-05-18" />)
+
+    await user.click(
+      await screen.findByRole('button', {
+        name: '월요일 10:30 학습 블록 추가',
+      }),
+    )
+
+    getPlannerSelect('강의').focus()
+    await user.keyboard('{ArrowDown}{ArrowDown}{Enter}')
+
+    expect(getPlannerSelect('강의')).toHaveTextContent('React 상태 관리')
   })
 
   it('추가 모달 확인 시 draft 블록을 추가하고 dirty 상태가 된다', async () => {
@@ -240,7 +273,7 @@ describe('PlannerPage', () => {
         name: '월요일 10:30 학습 블록 추가',
       }),
     )
-    await user.selectOptions(screen.getByLabelText('강의'), 'course-react')
+    await selectPlannerOption(user, '강의', 'React 상태 관리')
     await user.click(screen.getByRole('button', { name: '확인' }))
 
     expect(screen.getByText('월요일 · 10:30 - 11:00')).toBeInTheDocument()
@@ -288,7 +321,7 @@ describe('PlannerPage', () => {
         name: '월요일 10:30 학습 블록 추가',
       }),
     )
-    await user.selectOptions(screen.getByLabelText('강의'), 'course-react')
+    await selectPlannerOption(user, '강의', 'React 상태 관리')
     await user.click(screen.getByRole('button', { name: '확인' }))
 
     const saveButton = screen.getByRole('button', { name: '저장' })
@@ -337,7 +370,7 @@ describe('PlannerPage', () => {
         name: '월요일 10:30 학습 블록 추가',
       }),
     )
-    await user.selectOptions(screen.getByLabelText('강의'), 'course-react')
+    await selectPlannerOption(user, '강의', 'React 상태 관리')
     await user.click(screen.getByRole('button', { name: '확인' }))
     await user.click(screen.getByRole('button', { name: '저장' }))
 
@@ -398,7 +431,7 @@ describe('PlannerPage', () => {
         name: '월요일 10:30 학습 블록 추가',
       }),
     )
-    await user.selectOptions(screen.getByLabelText('강의'), 'course-react')
+    await selectPlannerOption(user, '강의', 'React 상태 관리')
     await user.type(screen.getByLabelText('메모'), '30분 블록 메모')
     await user.click(screen.getByRole('button', { name: '확인' }))
 
@@ -429,7 +462,7 @@ describe('PlannerPage', () => {
     expect(screen.getByRole('dialog')).toBeInTheDocument()
     expect(screen.queryByText('학습 블록 편집')).not.toBeInTheDocument()
 
-    await user.selectOptions(screen.getByLabelText('종료 시간'), '11:00')
+    await selectPlannerOption(user, '종료 시간', '11:00')
     await user.click(screen.getByRole('button', { name: '확인' }))
 
     expect(screen.getByText('월요일 · 09:00 - 11:00')).toBeInTheDocument()
@@ -495,8 +528,8 @@ describe('PlannerPage', () => {
         name: '월요일 10:30 학습 블록 추가',
       }),
     )
-    await user.selectOptions(screen.getByLabelText('강의'), 'course-react')
-    await user.selectOptions(screen.getByLabelText('종료 시간'), '10:30')
+    await selectPlannerOption(user, '강의', 'React 상태 관리')
+    await selectPlannerOption(user, '종료 시간', '10:30')
     await user.click(screen.getByRole('button', { name: '확인' }))
 
     expect(
@@ -516,7 +549,7 @@ describe('PlannerPage', () => {
         name: '월요일 09:30 학습 블록 추가',
       }),
     )
-    await user.selectOptions(screen.getByLabelText('강의'), 'course-typescript')
+    await selectPlannerOption(user, '강의', 'TypeScript 기초')
     await user.click(screen.getByRole('button', { name: '확인' }))
 
     expect(
@@ -538,7 +571,7 @@ describe('PlannerPage', () => {
         name: '월요일 10:30 학습 블록 추가',
       }),
     )
-    await user.selectOptions(screen.getByLabelText('강의'), 'course-react')
+    await selectPlannerOption(user, '강의', 'React 상태 관리')
     await user.type(screen.getByLabelText('메모'), 'a'.repeat(201))
     await user.click(screen.getByRole('button', { name: '확인' }))
 

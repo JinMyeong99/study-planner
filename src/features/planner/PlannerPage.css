@@ -724,14 +724,14 @@
   color: #172033;
 }
 
-.planner-modal label {
+.planner-modal label,
+.planner-select {
   display: grid;
   gap: 8px;
   color: #344054;
   font-weight: 800;
 }
 
-.planner-modal select,
 .planner-modal textarea {
   width: 100%;
   border: 1px solid rgba(18, 27, 47, 0.12);
@@ -740,22 +740,10 @@
   color: #172033;
 }
 
-.planner-modal select {
-  appearance: none;
-  padding: 12px 42px 12px 14px;
-  background:
-    linear-gradient(45deg, transparent 50%, #667085 50%) right 18px center /
-      6px 6px no-repeat,
-    linear-gradient(135deg, #667085 50%, transparent 50%) right 13px center /
-      6px 6px no-repeat,
-    #ffffff;
-}
-
 .planner-modal textarea {
   padding: 12px 14px;
 }
 
-.planner-modal select:focus,
 .planner-modal textarea:focus {
   border-color: rgba(74, 144, 217, 0.46);
   box-shadow: 0 0 0 4px rgba(74, 144, 217, 0.12);
@@ -764,6 +752,104 @@
 
 .planner-modal textarea {
   resize: vertical;
+}
+
+.planner-select__control {
+  position: relative;
+}
+
+.planner-select__trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  border: 1px solid rgba(18, 27, 47, 0.12);
+  border-radius: 16px;
+  padding: 12px 14px;
+  background: #ffffff;
+  color: #172033;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.planner-select__trigger:hover,
+.planner-select__trigger:focus-visible {
+  border-color: rgba(74, 144, 217, 0.46);
+  box-shadow: 0 0 0 4px rgba(74, 144, 217, 0.12);
+  outline: none;
+}
+
+.planner-select__trigger.is-empty {
+  color: #667085;
+}
+
+.planner-select__value {
+  display: inline-flex;
+  align-items: center;
+  min-width: 0;
+  gap: 8px;
+}
+
+.planner-select__chevron {
+  flex-shrink: 0;
+  color: #667085;
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.planner-select__dot {
+  flex-shrink: 0;
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+}
+
+.planner-select__listbox {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  left: 0;
+  z-index: 25;
+  display: grid;
+  gap: 4px;
+  max-height: 220px;
+  overflow: auto;
+  margin-top: 0;
+  padding: 6px;
+  border: 1px solid rgba(18, 27, 47, 0.1);
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow:
+    0 4px 6px rgba(18, 27, 47, 0.06),
+    0 16px 40px rgba(18, 27, 47, 0.16);
+}
+
+.planner-select__option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  border: 0;
+  border-radius: 12px;
+  padding: 10px 12px;
+  background: transparent;
+  color: #344054;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.planner-select__option:hover,
+.planner-select__option.is-active {
+  background: #eef6ff;
+  color: #155c9f;
+}
+
+.planner-select__option[aria-selected='true'] {
+  background: #eaf3ff;
+  color: #155c9f;
 }
 
 .planner-modal__time-fields {
