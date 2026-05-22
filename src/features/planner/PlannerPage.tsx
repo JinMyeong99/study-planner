@@ -2,8 +2,10 @@ import { lazy, Suspense, useMemo, useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { PlannerApiError, savePlanner } from './api'
+import { ConfirmDialog } from './components/ConfirmDialog'
 import { PlannerBlockList } from './components/PlannerBlockList'
 import { PlannerBlockModal } from './components/PlannerBlockModal'
+import { PlannerWeekGrid } from './components/PlannerWeekGrid'
 import {
   formatLocalDate,
   getWeekDateRangeLabel,
@@ -25,12 +27,15 @@ import { useEditablePlannerState } from './hooks/useEditablePlannerState'
 import { usePlannerData } from './hooks/usePlannerData'
 import { useUnsavedChangesWarning } from './hooks/useUnsavedChangesWarning'
 import { useWeekNavigation } from './hooks/useWeekNavigation'
-import { ConfirmDialog } from './components/ConfirmDialog'
-const PlannerSummary = lazy(() => import('./components/PlannerSummary').then(m => ({ default: m.PlannerSummary })))
-import { PlannerWeekGrid } from './components/PlannerWeekGrid'
 import type { PlannerBlockFormValues, PlannerModalState } from './types'
 import { plannerQueryKeys } from './queryKeys'
 import './PlannerPage.css'
+
+const PlannerSummary = lazy(() =>
+  import('./components/PlannerSummary').then((module) => ({
+    default: module.PlannerSummary,
+  })),
+)
 
 export interface PlannerPageProps {
   initialWeekStart?: string
