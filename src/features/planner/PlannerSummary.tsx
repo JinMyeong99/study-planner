@@ -22,8 +22,6 @@ import {
   formatStudyDuration,
 } from './utils/summary'
 
-const DAY_ORDER = [0, 1, 2, 3, 4, 5, 6] as const
-
 interface PlannerSummaryProps {
   blocks: StudyBlock[]
   courses: Course[]
@@ -37,7 +35,7 @@ export const PlannerSummary = ({ blocks, courses }: PlannerSummaryProps) => {
     [blocks],
   )
 
-  const activeDays = DAY_ORDER.filter((day) => minutesByDay.has(day))
+  const activeDays = [0, 1, 2, 3, 4, 5, 6].filter((day) => minutesByDay.has(day))
   const activeCourses = courses.filter((c) => minutesByCourse.has(c.id))
 
   const courseChartData = useMemo(
