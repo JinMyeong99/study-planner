@@ -1,4 +1,5 @@
 import './PlannerBlockList.css'
+import { PLANNER_BLOCK_FALLBACK_COLOR } from './constants'
 import type { Course, StudyBlock } from './types'
 import { createCourseMap } from './utils/course'
 import { formatDayOfWeek } from './utils/date'
@@ -51,7 +52,7 @@ export const PlannerBlockList = ({
               <span
                 aria-hidden="true"
                 className="planner-block-card__color"
-                style={{ backgroundColor: course?.color ?? '#8f97a8' }}
+                style={{ backgroundColor: course?.color ?? PLANNER_BLOCK_FALLBACK_COLOR }}
               />
               <span className="planner-block-card__content">
                 <strong>{course?.title ?? '알 수 없는 강의'}</strong>

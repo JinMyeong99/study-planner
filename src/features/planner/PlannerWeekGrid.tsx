@@ -1,6 +1,7 @@
 import { useState, useMemo, type CSSProperties } from 'react'
 
 import './PlannerWeekGrid.css'
+import { PLANNER_BLOCK_FALLBACK_COLOR } from './constants'
 import type { Course, StudyBlock } from './types'
 import { createCourseMap } from './utils/course'
 import { getWeekdayDateLabels, PLANNER_WEEKDAY_LABELS } from './utils/date'
@@ -164,9 +165,9 @@ export const PlannerWeekGrid = ({
               const placement = getBlockGridPlacement(block)
               const hasConflict = conflictBlockIds.has(block.id)
               const blockStyle = {
-                '--planner-block-color': course?.color ?? '#8f97a8',
+                '--planner-block-color': course?.color ?? PLANNER_BLOCK_FALLBACK_COLOR,
                 '--planner-block-bg': getCourseBackground(
-                  course?.color ?? '#8f97a8',
+                  course?.color ?? PLANNER_BLOCK_FALLBACK_COLOR,
                 ),
                 height: `${placement.height}px`,
                 top: `${placement.top}px`,
