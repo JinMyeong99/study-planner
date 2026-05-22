@@ -140,40 +140,6 @@
   margin-right: auto;
 }
 
-.planner-delete-confirm-backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 30;
-  display: grid;
-  place-items: center;
-  border-radius: 0;
-  background: rgba(18, 27, 47, 0.36);
-}
-
-.planner-delete-confirm {
-  width: min(280px, calc(100% - 32px));
-  padding: 24px;
-  border-radius: 20px;
-  background: #ffffff;
-  box-shadow:
-    0 4px 6px rgba(18, 27, 47, 0.06),
-    0 12px 32px rgba(18, 27, 47, 0.18);
-}
-
-.planner-delete-confirm__message {
-  margin: 0 0 20px;
-  color: #172033;
-  font-size: 0.95rem;
-  font-weight: 700;
-  line-height: 1.5;
-  text-align: center;
-}
-
-.planner-delete-confirm__actions {
-  display: flex;
-  gap: 8px;
-  justify-content: center;
-}
 
 .planner-modal__secondary-button,
 .planner-modal__primary-button,

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useState } from 'react'
 
 import { addWeeksToLocalDate } from '../utils/date'
 
@@ -18,12 +18,6 @@ export const useWeekNavigation = ({
   onMoveToWeek,
 }: UseWeekNavigationParams) => {
   const [pendingWeekStart, setPendingWeekStart] = useState<string | null>(null)
-  const keepEditingButtonRef = useRef<HTMLButtonElement>(null)
-
-  useEffect(() => {
-    if (!pendingWeekStart) return
-    keepEditingButtonRef.current?.focus()
-  }, [pendingWeekStart])
 
   const handleWeekChange = (amount: number) => {
     if (isPending) return
@@ -54,7 +48,6 @@ export const useWeekNavigation = ({
 
   return {
     pendingWeekStart,
-    keepEditingButtonRef,
     handleWeekChange,
     cancelWeekChange,
     confirmWeekChange,
