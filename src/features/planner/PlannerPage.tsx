@@ -127,7 +127,7 @@ const PlannerBlockList = ({
   if (sortedBlocks.length === 0) {
     return (
       <div className="planner-empty-state">
-        <strong>이번 주 강의가 없습니다.</strong>
+        <strong>강의를 추가해 주세요.</strong>
       </div>
     )
   }
@@ -447,7 +447,7 @@ export const PlannerPage = ({ initialWeekStart }: PlannerPageProps) => {
               aria-labelledby="planner-block-list-title"
             >
               <div className="planner-panel__header">
-                <h2 id="planner-block-list-title">이번 주 강의</h2>
+                <h2 id="planner-block-list-title">이번 주 강의 리스트</h2>
                 <span>{editablePlanner.draftBlocks.length}개</span>
               </div>
               <PlannerBlockList

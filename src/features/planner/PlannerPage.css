@@ -361,8 +361,9 @@
 }
 
 .planner-empty-state strong {
-  color: #172033;
+  color: #667085;
   font-size: 1.05rem;
+  font-weight: 700;
 }
 
 .planner-empty-state span {
