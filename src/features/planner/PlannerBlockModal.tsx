@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 
+import './PlannerBlockModal.css'
+
 import type { Course, PlannerBlockFormValues, StudyBlock } from './types'
 import { createCourseMap } from './utils/course'
 import {

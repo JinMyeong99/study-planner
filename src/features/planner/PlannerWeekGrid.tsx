@@ -1,5 +1,6 @@
 import { useState, useMemo, type CSSProperties } from 'react'
 
+import './PlannerWeekGrid.css'
 import type { Course, StudyBlock } from './types'
 import { createCourseMap } from './utils/course'
 import { getWeekdayDateLabels, PLANNER_WEEKDAY_LABELS } from './utils/date'
