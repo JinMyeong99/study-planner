@@ -152,11 +152,8 @@ export const PlannerPage = ({ initialWeekStart }: PlannerPageProps) => {
       return
     }
 
-    if (conflictPair) {
-      setToast({
-        message: formatConflictMessage(conflictPair, plannerData.courses),
-        type: 'error',
-      })
+    if (conflictMessage) {
+      setToast({ message: conflictMessage, type: 'error' })
       return
     }
 
