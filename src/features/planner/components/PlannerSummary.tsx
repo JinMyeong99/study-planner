@@ -1,8 +1,4 @@
 import { useMemo } from 'react'
-
-import './PlannerSummary.css'
-
-const PLANNER_PRIMARY_COLOR = '#FC1150'
 import {
   Bar,
   BarChart,
@@ -23,6 +19,9 @@ import {
   calculateTotalMinutes,
   formatStudyDuration,
 } from '../utils/summary'
+import './PlannerSummary.css'
+
+const PLANNER_PRIMARY_COLOR = '#FC1150'
 
 interface PlannerSummaryProps {
   blocks: StudyBlock[]
@@ -37,8 +36,14 @@ export const PlannerSummary = ({ blocks, courses }: PlannerSummaryProps) => {
     [blocks],
   )
 
-  const activeDays = [0, 1, 2, 3, 4, 5, 6].filter((day) => minutesByDay.has(day))
-  const activeCourses = courses.filter((c) => minutesByCourse.has(c.id))
+  const activeDays = useMemo(
+    () => [0, 1, 2, 3, 4, 5, 6].filter((day) => minutesByDay.has(day)),
+    [minutesByDay],
+  )
+  const activeCourses = useMemo(
+    () => courses.filter((course) => minutesByCourse.has(course.id)),
+    [courses, minutesByCourse],
+  )
 
   const courseChartData = useMemo(
     () =>

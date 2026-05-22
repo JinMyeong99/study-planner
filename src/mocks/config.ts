@@ -1,6 +1,5 @@
 interface MockEnv {
-  DEV?: boolean
-  MODE?: string
+  readonly [key: string]: string | boolean | undefined
   VITE_ENABLE_MOCKS?: string
 }
 
