@@ -1,5 +1,4 @@
-import type { StudyBlock } from '../types'
-import type { PlannerBlockFormValues } from '../PlannerBlockModal'
+import type { PlannerBlockFormValues, StudyBlock } from '../types'
 import { getNextPlannerSlotTime } from './time'
 
 export const createFormValuesFromBlock = (

@@ -9,7 +9,6 @@ import {
 } from './time'
 
 export const PLANNER_GRID_SLOT_HEIGHT = 42
-export const plannerTotalMinutes = plannerEndMinutes - plannerStartMinutes
 
 export const createPlannerTimeSlots = () => {
   const slots: string[] = []
