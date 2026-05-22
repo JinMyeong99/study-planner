@@ -1,4 +1,11 @@
-import { useEffect, useRef, useState, type FormEvent } from 'react'
+import {
+  useEffect,
+  useId,
+  useRef,
+  useState,
+  type FormEvent,
+  type KeyboardEvent,
+} from 'react'
 
 import type { Course, StudyBlock } from './types'
 import { areBlocksOverlapping } from './utils/conflict'
@@ -30,6 +37,19 @@ interface PlannerBlockModalProps {
   onSubmit: (values: PlannerBlockFormValues) => void
 }
 
+interface PlannerSelectOption {
+  color?: string
+  label: string
+  value: string
+}
+
+interface PlannerSelectProps {
+  label: string
+  onChange: (value: string) => void
+  options: PlannerSelectOption[]
+  value: string
+}
+
 const MAX_MEMO_LENGTH = 200
 
 const createPlannerTimeOptions = () => {
@@ -52,6 +72,172 @@ const endTimeOptions = timeOptions.slice(1)
 
 const createCourseMap = (courses: Course[]) =>
   new Map(courses.map((course) => [course.id, course]))
+
+const getSelectedOptionIndex = (
+  options: PlannerSelectOption[],
+  value: string,
+) => {
+  const selectedIndex = options.findIndex((option) => option.value === value)
+
+  return selectedIndex >= 0 ? selectedIndex : 0
+}
+
+const PlannerSelect = ({
+  label,
+  onChange,
+  options,
+  value,
+}: PlannerSelectProps) => {
+  const labelId = useId()
+  const listboxId = useId()
+  const valueId = useId()
+  const selectRef = useRef<HTMLDivElement>(null)
+  const selectedIndex = getSelectedOptionIndex(options, value)
+  const [isOpen, setIsOpen] = useState(false)
+  const [activeIndex, setActiveIndex] = useState(selectedIndex)
+  const selectedOption = options[selectedIndex]
+  const activeOptionId = `${listboxId}-option-${activeIndex}`
+
+  useEffect(() => {
+    if (!isOpen) return
+
+    const closeOnOutsideClick = (event: MouseEvent) => {
+      if (!selectRef.current?.contains(event.target as Node)) {
+        setIsOpen(false)
+      }
+    }
+
+    document.addEventListener('mousedown', closeOnOutsideClick)
+
+    return () => {
+      document.removeEventListener('mousedown', closeOnOutsideClick)
+    }
+  }, [isOpen])
+
+  const openListbox = () => {
+    setActiveIndex(selectedIndex)
+    setIsOpen(true)
+  }
+
+  const selectOption = (option: PlannerSelectOption) => {
+    onChange(option.value)
+    setIsOpen(false)
+  }
+
+  const moveActiveOption = (amount: number) => {
+    setActiveIndex((currentIndex) =>
+      (currentIndex + amount + options.length) % options.length,
+    )
+  }
+
+  const handleKeyDown = (event: KeyboardEvent<HTMLButtonElement>) => {
+    if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+      event.preventDefault()
+
+      if (!isOpen) {
+        openListbox()
+        return
+      }
+
+      moveActiveOption(event.key === 'ArrowDown' ? 1 : -1)
+      return
+    }
+
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault()
+
+      if (!isOpen) {
+        openListbox()
+        return
+      }
+
+      selectOption(options[activeIndex])
+      return
+    }
+
+    if (event.key === 'Escape') {
+      setIsOpen(false)
+    }
+  }
+
+  return (
+    <div className="planner-select" ref={selectRef}>
+      <span id={labelId}>{label}</span>
+      <div className="planner-select__control">
+        <button
+          aria-activedescendant={isOpen ? activeOptionId : undefined}
+          aria-controls={listboxId}
+          aria-expanded={isOpen}
+          aria-haspopup="listbox"
+          aria-labelledby={`${labelId} ${valueId}`}
+          className={
+            value ? 'planner-select__trigger' : 'planner-select__trigger is-empty'
+          }
+          onClick={() => {
+            if (isOpen) {
+              setIsOpen(false)
+              return
+            }
+
+            openListbox()
+          }}
+          onKeyDown={handleKeyDown}
+          role="combobox"
+          type="button"
+        >
+          <span className="planner-select__value" id={valueId}>
+            {selectedOption.color ? (
+              <span
+                aria-hidden="true"
+                className="planner-select__dot"
+                style={{ backgroundColor: selectedOption.color }}
+              />
+            ) : null}
+            {selectedOption.label}
+          </span>
+          <span aria-hidden="true" className="planner-select__chevron">
+            ⌄
+          </span>
+        </button>
+        {isOpen ? (
+          <div
+            aria-label={`${label} 옵션`}
+            className="planner-select__listbox"
+            id={listboxId}
+            role="listbox"
+          >
+            {options.map((option, optionIndex) => (
+              <button
+                aria-selected={option.value === value}
+                className={[
+                  'planner-select__option',
+                  optionIndex === activeIndex ? 'is-active' : '',
+                ]
+                  .filter(Boolean)
+                  .join(' ')}
+                id={`${listboxId}-option-${optionIndex}`}
+                key={option.value}
+                onClick={() => selectOption(option)}
+                onMouseEnter={() => setActiveIndex(optionIndex)}
+                role="option"
+                type="button"
+              >
+                {option.color ? (
+                  <span
+                    aria-hidden="true"
+                    className="planner-select__dot"
+                    style={{ backgroundColor: option.color }}
+                  />
+                ) : null}
+                {option.label}
+              </button>
+            ))}
+          </div>
+        ) : null}
+      </div>
+    </div>
+  )
+}
 
 const findConflictBlock = (
   candidate: PlannerBlockFormValues,
@@ -125,6 +311,26 @@ export const PlannerBlockModal = ({
   const cancelDeleteButtonRef = useRef<HTMLButtonElement>(null)
   const courseMap = createCourseMap(courses)
   const deleteConfirmMessage = `'${courseMap.get(values.courseId)?.title ?? '이 강의'}'를 삭제할까요?`
+  const courseOptions = [
+    { label: '강의 선택', value: '' },
+    ...courses.map((course) => ({
+      color: course.color,
+      label: course.title,
+      value: course.id,
+    })),
+  ]
+  const weekdayOptions = PLANNER_WEEKDAY_LABELS.map((weekday, dayOfWeek) => ({
+    label: `${weekday}요일`,
+    value: String(dayOfWeek),
+  }))
+  const startTimeSelectOptions = startTimeOptions.map((time) => ({
+    label: time,
+    value: time,
+  }))
+  const endTimeSelectOptions = endTimeOptions.map((time) => ({
+    label: time,
+    value: time,
+  }))
   const memoLength = values.memo.length
 
   useEffect(() => {
@@ -184,71 +390,42 @@ export const PlannerBlockModal = ({
           </div>
 
           <div className="planner-modal__fields">
-            <label>
-              <span>강의</span>
-              <select
-                onChange={(event) => {
-                  updateValue('courseId', event.target.value)
-                }}
-                value={values.courseId}
-              >
-                <option value="">강의 선택</option>
-                {courses.map((course) => (
-                  <option key={course.id} value={course.id}>
-                    {course.title}
-                  </option>
-                ))}
-              </select>
-            </label>
+            <PlannerSelect
+              label="강의"
+              onChange={(nextValue) => {
+                updateValue('courseId', nextValue)
+              }}
+              options={courseOptions}
+              value={values.courseId}
+            />
 
-            <label>
-              <span>요일</span>
-              <select
-                onChange={(event) => {
-                  updateValue('dayOfWeek', Number(event.target.value))
-                }}
-                value={values.dayOfWeek}
-              >
-                {PLANNER_WEEKDAY_LABELS.map((weekday, dayOfWeek) => (
-                  <option key={weekday} value={dayOfWeek}>
-                    {weekday}요일
-                  </option>
-                ))}
-              </select>
-            </label>
+            <PlannerSelect
+              label="요일"
+              onChange={(nextValue) => {
+                updateValue('dayOfWeek', Number(nextValue))
+              }}
+              options={weekdayOptions}
+              value={String(values.dayOfWeek)}
+            />
 
             <div className="planner-modal__time-fields">
-              <label>
-                <span>시작 시간</span>
-                <select
-                  onChange={(event) => {
-                    updateValue('startTime', event.target.value)
-                  }}
-                  value={values.startTime}
-                >
-                  {startTimeOptions.map((time) => (
-                    <option key={time} value={time}>
-                      {time}
-                    </option>
-                  ))}
-                </select>
-              </label>
+              <PlannerSelect
+                label="시작 시간"
+                onChange={(nextValue) => {
+                  updateValue('startTime', nextValue)
+                }}
+                options={startTimeSelectOptions}
+                value={values.startTime}
+              />
 
-              <label>
-                <span>종료 시간</span>
-                <select
-                  onChange={(event) => {
-                    updateValue('endTime', event.target.value)
-                  }}
-                  value={values.endTime}
-                >
-                  {endTimeOptions.map((time) => (
-                    <option key={time} value={time}>
-                      {time}
-                    </option>
-                  ))}
-                </select>
-              </label>
+              <PlannerSelect
+                label="종료 시간"
+                onChange={(nextValue) => {
+                  updateValue('endTime', nextValue)
+                }}
+                options={endTimeSelectOptions}
+                value={values.endTime}
+              />
             </div>
 
             <label>
@@ -257,7 +434,7 @@ export const PlannerBlockModal = ({
                 onChange={(event) => {
                   updateValue('memo', event.target.value)
                 }}
-                placeholder="학습 목표나 복습 메모를 남겨보세요."
+                placeholder="학습 목표나 메모를 남겨보세요."
                 rows={4}
                 value={values.memo}
               />

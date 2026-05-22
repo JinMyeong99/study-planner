@@ -7,7 +7,30 @@ import { describe, expect, it } from 'vitest'
 
 import { server } from '../../mocks/server'
 import { PlannerPage } from './PlannerPage'
-import type { SavePlannerRequest, SavePlannerResponse } from './types'
+import type {
+  SavePlannerRequest,
+  SavePlannerResponse,
+  StudyBlock,
+} from './types'
+
+const savedPlannerBlocks: StudyBlock[] = [
+  {
+    id: 'block-1',
+    courseId: 'course-react',
+    dayOfWeek: 0,
+    startTime: '09:00',
+    endTime: '10:30',
+    memo: '상태와 서버 상태 분리 복습',
+  },
+  {
+    id: 'block-2',
+    courseId: 'course-typescript',
+    dayOfWeek: 2,
+    startTime: '14:00',
+    endTime: '16:00',
+    memo: '타입 좁히기 예제 풀이',
+  },
+]
 
 const renderWithQueryClient = (ui: ReactElement) => {
   const queryClient = new QueryClient({
@@ -30,8 +53,39 @@ const dispatchBeforeUnloadEvent = () => {
   return event
 }
 
+const getPlannerSelect = (name: string) =>
+  screen.getByRole('combobox', { name: new RegExp(name) })
+
+const selectPlannerOption = async (
+  user: ReturnType<typeof userEvent.setup>,
+  selectName: string,
+  optionName: string,
+) => {
+  await user.click(getPlannerSelect(selectName))
+  await user.click(screen.getByRole('option', { name: optionName }))
+}
+
+const useStoredPlannerBlocks = (
+  blocks: StudyBlock[] = savedPlannerBlocks,
+  weekStart = '2026-05-18',
+) => {
+  server.use(
+    http.get('/api/planner', ({ request }) => {
+      const requestedWeekStart =
+        new URL(request.url).searchParams.get('weekStart') ?? weekStart
+
+      return HttpResponse.json({
+        weekStart: requestedWeekStart,
+        blocks: requestedWeekStart === weekStart ? blocks : [],
+      })
+    }),
+  )
+}
+
 describe('PlannerPage', () => {
   it('저장된 주간 블록을 렌더링한다', async () => {
+    useStoredPlannerBlocks()
+
     renderWithQueryClient(<PlannerPage initialWeekStart="2026-05-18" />)
 
     expect(await screen.findAllByText('React 상태 관리')).toHaveLength(3)
@@ -60,6 +114,8 @@ describe('PlannerPage', () => {
   })
 
   it('학습 블록을 시간 그리드 안에 배치한다', async () => {
+    useStoredPlannerBlocks()
+
     renderWithQueryClient(<PlannerPage initialWeekStart="2026-05-18" />)
 
     const grid = await screen.findByRole('region', {
@@ -104,7 +160,7 @@ describe('PlannerPage', () => {
     renderWithQueryClient(<PlannerPage initialWeekStart="2099-01-04" />)
 
     expect(
-      await screen.findByText('이번 주 강의가 없습니다.'),
+      await screen.findByText('강의를 추가해 주세요.'),
     ).toBeInTheDocument()
     expect(
       screen.getByRole('region', { name: '주간 시간 그리드' }),
@@ -113,6 +169,8 @@ describe('PlannerPage', () => {
 
   it('주간 이동 버튼으로 다음 주와 이전 주를 이동한다', async () => {
     const user = userEvent.setup()
+
+    useStoredPlannerBlocks()
 
     renderWithQueryClient(<PlannerPage initialWeekStart="2026-05-18" />)
 
@@ -127,7 +185,7 @@ describe('PlannerPage', () => {
       await screen.findByText('2026년 5월 25일 - 5월 31일'),
     ).toBeInTheDocument()
     expect(screen.getAllByLabelText('월요일 5/25').length).toBeGreaterThan(0)
-    expect(screen.getByText('이번 주 강의가 없습니다.')).toBeInTheDocument()
+    expect(screen.getByText('강의를 추가해 주세요.')).toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: '이전 주로 이동' }))
 
@@ -148,7 +206,7 @@ describe('PlannerPage', () => {
         name: '월요일 10:30 학습 블록 추가',
       }),
     )
-    await user.selectOptions(screen.getByLabelText('강의'), 'course-react')
+    await selectPlannerOption(user, '강의', 'React 상태 관리')
     await user.click(screen.getByRole('button', { name: '확인' }))
     await user.click(screen.getByRole('button', { name: '다음 주로 이동' }))
 
@@ -186,7 +244,7 @@ describe('PlannerPage', () => {
         name: '월요일 10:30 학습 블록 추가',
       }),
     )
-    await user.selectOptions(screen.getByLabelText('강의'), 'course-react')
+    await selectPlannerOption(user, '강의', 'React 상태 관리')
     await user.click(screen.getByRole('button', { name: '확인' }))
     await user.click(screen.getByRole('button', { name: '다음 주로 이동' }))
 
@@ -203,7 +261,7 @@ describe('PlannerPage', () => {
     expect(
       await screen.findByText('2026년 5월 25일 - 5월 31일'),
     ).toBeInTheDocument()
-    expect(screen.getByText('이번 주 강의가 없습니다.')).toBeInTheDocument()
+    expect(screen.getByText('강의를 추가해 주세요.')).toBeInTheDocument()
     expect(screen.queryByText('월요일 · 10:30 - 11:00')).not.toBeInTheDocument()
     expect(screen.queryByText('저장되지 않은 변경 사항')).not.toBeInTheDocument()
     expect(dispatchBeforeUnloadEvent().defaultPrevented).toBe(false)
@@ -225,9 +283,30 @@ describe('PlannerPage', () => {
       '×',
     )
     expect(screen.queryByText('로컬 편집')).not.toBeInTheDocument()
-    expect(screen.getByLabelText('요일')).toHaveValue('0')
-    expect(screen.getByLabelText('시작 시간')).toHaveValue('10:30')
-    expect(screen.getByLabelText('종료 시간')).toHaveValue('11:00')
+    expect(getPlannerSelect('강의')).toHaveTextContent('강의 선택')
+    expect(getPlannerSelect('요일')).toHaveTextContent('월요일')
+    expect(getPlannerSelect('시작 시간')).toHaveTextContent('10:30')
+    expect(getPlannerSelect('종료 시간')).toHaveTextContent('11:00')
+    expect(
+      screen.getByPlaceholderText('학습 목표나 메모를 남겨보세요.'),
+    ).toBeInTheDocument()
+  })
+
+  it('커스텀 선택 리스트에서 방향키로 강의를 선택한다', async () => {
+    const user = userEvent.setup()
+
+    renderWithQueryClient(<PlannerPage initialWeekStart="2026-05-18" />)
+
+    await user.click(
+      await screen.findByRole('button', {
+        name: '월요일 10:30 학습 블록 추가',
+      }),
+    )
+
+    getPlannerSelect('강의').focus()
+    await user.keyboard('{ArrowDown}{ArrowDown}{Enter}')
+
+    expect(getPlannerSelect('강의')).toHaveTextContent('React 상태 관리')
   })
 
   it('추가 모달 확인 시 draft 블록을 추가하고 dirty 상태가 된다', async () => {
@@ -240,7 +319,7 @@ describe('PlannerPage', () => {
         name: '월요일 10:30 학습 블록 추가',
       }),
     )
-    await user.selectOptions(screen.getByLabelText('강의'), 'course-react')
+    await selectPlannerOption(user, '강의', 'React 상태 관리')
     await user.click(screen.getByRole('button', { name: '확인' }))
 
     expect(screen.getByText('월요일 · 10:30 - 11:00')).toBeInTheDocument()
@@ -288,7 +367,7 @@ describe('PlannerPage', () => {
         name: '월요일 10:30 학습 블록 추가',
       }),
     )
-    await user.selectOptions(screen.getByLabelText('강의'), 'course-react')
+    await selectPlannerOption(user, '강의', 'React 상태 관리')
     await user.click(screen.getByRole('button', { name: '확인' }))
 
     const saveButton = screen.getByRole('button', { name: '저장' })
@@ -337,7 +416,7 @@ describe('PlannerPage', () => {
         name: '월요일 10:30 학습 블록 추가',
       }),
     )
-    await user.selectOptions(screen.getByLabelText('강의'), 'course-react')
+    await selectPlannerOption(user, '강의', 'React 상태 관리')
     await user.click(screen.getByRole('button', { name: '확인' }))
     await user.click(screen.getByRole('button', { name: '저장' }))
 
@@ -398,7 +477,7 @@ describe('PlannerPage', () => {
         name: '월요일 10:30 학습 블록 추가',
       }),
     )
-    await user.selectOptions(screen.getByLabelText('강의'), 'course-react')
+    await selectPlannerOption(user, '강의', 'React 상태 관리')
     await user.type(screen.getByLabelText('메모'), '30분 블록 메모')
     await user.click(screen.getByRole('button', { name: '확인' }))
 
@@ -418,6 +497,8 @@ describe('PlannerPage', () => {
   it('기존 블록 클릭 시 값을 수정한다', async () => {
     const user = userEvent.setup()
 
+    useStoredPlannerBlocks()
+
     renderWithQueryClient(<PlannerPage initialWeekStart="2026-05-18" />)
 
     await user.click(
@@ -429,7 +510,7 @@ describe('PlannerPage', () => {
     expect(screen.getByRole('dialog')).toBeInTheDocument()
     expect(screen.queryByText('학습 블록 편집')).not.toBeInTheDocument()
 
-    await user.selectOptions(screen.getByLabelText('종료 시간'), '11:00')
+    await selectPlannerOption(user, '종료 시간', '11:00')
     await user.click(screen.getByRole('button', { name: '확인' }))
 
     expect(screen.getByText('월요일 · 09:00 - 11:00')).toBeInTheDocument()
@@ -438,6 +519,8 @@ describe('PlannerPage', () => {
 
   it('삭제 버튼 클릭 시 확인 단계를 거쳐 draft 블록을 제거한다', async () => {
     const user = userEvent.setup()
+
+    useStoredPlannerBlocks()
 
     renderWithQueryClient(<PlannerPage initialWeekStart="2026-05-18" />)
 
@@ -463,6 +546,8 @@ describe('PlannerPage', () => {
 
   it('삭제 확인 단계에서 취소하면 블록이 유지된다', async () => {
     const user = userEvent.setup()
+
+    useStoredPlannerBlocks()
 
     renderWithQueryClient(<PlannerPage initialWeekStart="2026-05-18" />)
 
@@ -495,8 +580,8 @@ describe('PlannerPage', () => {
         name: '월요일 10:30 학습 블록 추가',
       }),
     )
-    await user.selectOptions(screen.getByLabelText('강의'), 'course-react')
-    await user.selectOptions(screen.getByLabelText('종료 시간'), '10:30')
+    await selectPlannerOption(user, '강의', 'React 상태 관리')
+    await selectPlannerOption(user, '종료 시간', '10:30')
     await user.click(screen.getByRole('button', { name: '확인' }))
 
     expect(
@@ -509,6 +594,8 @@ describe('PlannerPage', () => {
   it('겹치는 시간 블록이면 충돌 메시지를 보여주고 draft에 반영하지 않는다', async () => {
     const user = userEvent.setup()
 
+    useStoredPlannerBlocks()
+
     renderWithQueryClient(<PlannerPage initialWeekStart="2026-05-18" />)
 
     await user.click(
@@ -516,7 +603,7 @@ describe('PlannerPage', () => {
         name: '월요일 09:30 학습 블록 추가',
       }),
     )
-    await user.selectOptions(screen.getByLabelText('강의'), 'course-typescript')
+    await selectPlannerOption(user, '강의', 'TypeScript 기초')
     await user.click(screen.getByRole('button', { name: '확인' }))
 
     expect(
@@ -538,7 +625,7 @@ describe('PlannerPage', () => {
         name: '월요일 10:30 학습 블록 추가',
       }),
     )
-    await user.selectOptions(screen.getByLabelText('강의'), 'course-react')
+    await selectPlannerOption(user, '강의', 'React 상태 관리')
     await user.type(screen.getByLabelText('메모'), 'a'.repeat(201))
     await user.click(screen.getByRole('button', { name: '확인' }))
 

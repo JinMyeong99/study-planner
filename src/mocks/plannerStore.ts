@@ -29,29 +29,7 @@ const mockCourses: Course[] = [
   },
 ]
 
-const initialPlannerBlocksByWeek = new Map<string, StudyBlock[]>([
-  [
-    '2026-05-18',
-    [
-      {
-        id: 'block-1',
-        courseId: 'course-react',
-        dayOfWeek: 0,
-        startTime: '09:00',
-        endTime: '10:30',
-        memo: '상태와 서버 상태 분리 복습',
-      },
-      {
-        id: 'block-2',
-        courseId: 'course-typescript',
-        dayOfWeek: 2,
-        startTime: '14:00',
-        endTime: '16:00',
-        memo: '타입 좁히기 예제 풀이',
-      },
-    ],
-  ],
-])
+const initialPlannerBlocksByWeek = new Map<string, StudyBlock[]>()
 
 const cloneBlock = (block: StudyBlock): StudyBlock => ({ ...block })
 
@@ -65,7 +43,7 @@ function clonePlannerMap(source: Map<string, StudyBlock[]>) {
 }
 
 let plannerBlocksByWeek = clonePlannerMap(initialPlannerBlocksByWeek)
-let nextBlockId = 3
+let nextBlockId = 1
 
 const createBlockId = () => {
   const id = `block-${nextBlockId}`
@@ -75,7 +53,7 @@ const createBlockId = () => {
 
 export const resetPlannerStore = () => {
   plannerBlocksByWeek = clonePlannerMap(initialPlannerBlocksByWeek)
-  nextBlockId = 3
+  nextBlockId = 1
 }
 
 export const getStoredCourses = (): Course[] =>

@@ -60,7 +60,7 @@ export const PlannerSummary = ({ blocks, courses }: PlannerSummaryProps) => {
   return (
     <section className="planner-summary" aria-labelledby="planner-summary-title">
       <div className="planner-panel__header">
-        <h2 id="planner-summary-title">주간 요약</h2>
+        <h2 id="planner-summary-title">주간 스케줄 요약</h2>
         <span className="planner-summary__total">
           총 {formatStudyDuration(totalMinutes)}
         </span>
