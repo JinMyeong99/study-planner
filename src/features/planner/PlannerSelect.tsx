@@ -7,11 +7,7 @@ import {
   type KeyboardEvent,
 } from 'react'
 
-export interface PlannerSelectOption {
-  color?: string
-  label: string
-  value: string
-}
+import type { PlannerSelectOption } from './types'
 
 interface PlannerSelectProps {
   label: string
