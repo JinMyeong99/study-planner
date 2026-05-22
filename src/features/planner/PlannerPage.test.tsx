@@ -7,7 +7,30 @@ import { describe, expect, it } from 'vitest'
 
 import { server } from '../../mocks/server'
 import { PlannerPage } from './PlannerPage'
-import type { SavePlannerRequest, SavePlannerResponse } from './types'
+import type {
+  SavePlannerRequest,
+  SavePlannerResponse,
+  StudyBlock,
+} from './types'
+
+const savedPlannerBlocks: StudyBlock[] = [
+  {
+    id: 'block-1',
+    courseId: 'course-react',
+    dayOfWeek: 0,
+    startTime: '09:00',
+    endTime: '10:30',
+    memo: '상태와 서버 상태 분리 복습',
+  },
+  {
+    id: 'block-2',
+    courseId: 'course-typescript',
+    dayOfWeek: 2,
+    startTime: '14:00',
+    endTime: '16:00',
+    memo: '타입 좁히기 예제 풀이',
+  },
+]
 
 const renderWithQueryClient = (ui: ReactElement) => {
   const queryClient = new QueryClient({
@@ -42,8 +65,27 @@ const selectPlannerOption = async (
   await user.click(screen.getByRole('option', { name: optionName }))
 }
 
+const useStoredPlannerBlocks = (
+  blocks: StudyBlock[] = savedPlannerBlocks,
+  weekStart = '2026-05-18',
+) => {
+  server.use(
+    http.get('/api/planner', ({ request }) => {
+      const requestedWeekStart =
+        new URL(request.url).searchParams.get('weekStart') ?? weekStart
+
+      return HttpResponse.json({
+        weekStart: requestedWeekStart,
+        blocks: requestedWeekStart === weekStart ? blocks : [],
+      })
+    }),
+  )
+}
+
 describe('PlannerPage', () => {
   it('저장된 주간 블록을 렌더링한다', async () => {
+    useStoredPlannerBlocks()
+
     renderWithQueryClient(<PlannerPage initialWeekStart="2026-05-18" />)
 
     expect(await screen.findAllByText('React 상태 관리')).toHaveLength(3)
@@ -72,6 +114,8 @@ describe('PlannerPage', () => {
   })
 
   it('학습 블록을 시간 그리드 안에 배치한다', async () => {
+    useStoredPlannerBlocks()
+
     renderWithQueryClient(<PlannerPage initialWeekStart="2026-05-18" />)
 
     const grid = await screen.findByRole('region', {
@@ -125,6 +169,8 @@ describe('PlannerPage', () => {
 
   it('주간 이동 버튼으로 다음 주와 이전 주를 이동한다', async () => {
     const user = userEvent.setup()
+
+    useStoredPlannerBlocks()
 
     renderWithQueryClient(<PlannerPage initialWeekStart="2026-05-18" />)
 
@@ -451,6 +497,8 @@ describe('PlannerPage', () => {
   it('기존 블록 클릭 시 값을 수정한다', async () => {
     const user = userEvent.setup()
 
+    useStoredPlannerBlocks()
+
     renderWithQueryClient(<PlannerPage initialWeekStart="2026-05-18" />)
 
     await user.click(
@@ -471,6 +519,8 @@ describe('PlannerPage', () => {
 
   it('삭제 버튼 클릭 시 확인 단계를 거쳐 draft 블록을 제거한다', async () => {
     const user = userEvent.setup()
+
+    useStoredPlannerBlocks()
 
     renderWithQueryClient(<PlannerPage initialWeekStart="2026-05-18" />)
 
@@ -496,6 +546,8 @@ describe('PlannerPage', () => {
 
   it('삭제 확인 단계에서 취소하면 블록이 유지된다', async () => {
     const user = userEvent.setup()
+
+    useStoredPlannerBlocks()
 
     renderWithQueryClient(<PlannerPage initialWeekStart="2026-05-18" />)
 
@@ -541,6 +593,8 @@ describe('PlannerPage', () => {
 
   it('겹치는 시간 블록이면 충돌 메시지를 보여주고 draft에 반영하지 않는다', async () => {
     const user = userEvent.setup()
+
+    useStoredPlannerBlocks()
 
     renderWithQueryClient(<PlannerPage initialWeekStart="2026-05-18" />)
 
