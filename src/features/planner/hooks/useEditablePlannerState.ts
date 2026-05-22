@@ -25,9 +25,6 @@ interface UseEditablePlannerStateParams {
   isReady: boolean
 }
 
-const clonePlannerBlocks = (blocks: StudyBlock[]) =>
-  blocks.map((block) => ({ ...block }))
-
 const serializePlannerBlocks = (blocks: StudyBlock[]) =>
   JSON.stringify(
     sortPlannerBlocks(blocks).map((block) => ({
@@ -63,9 +60,7 @@ export const useEditablePlannerState = ({
 
       return {
         weekStart,
-        blocks: clonePlannerBlocks(
-          resolveNextBlocks(clonePlannerBlocks(currentDraftBlocks)),
-        ),
+        blocks: resolveNextBlocks(currentDraftBlocks),
       }
     })
   }
@@ -105,8 +100,8 @@ export const useEditablePlannerState = ({
     serializePlannerBlocks(activeDraftBlocks) !== serializePlannerBlocks(savedBlocks)
 
   return {
-    savedBlocks: clonePlannerBlocks(savedBlocks),
-    draftBlocks: clonePlannerBlocks(activeDraftBlocks),
+    savedBlocks,
+    draftBlocks: activeDraftBlocks,
     isDirty,
     isReady,
     addDraftBlock,
