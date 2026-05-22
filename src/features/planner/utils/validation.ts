@@ -48,10 +48,10 @@ export const getValidationMessage = ({
     return `메모는 ${MAX_MEMO_LENGTH}자 이하로 입력해 주세요.`
   }
 
-  const courseMap = createCourseMap(courses)
   const conflictBlock = findConflictBlock(values, blocks, editingBlockId)
 
   if (conflictBlock) {
+    const courseMap = createCourseMap(courses)
     return `${formatBlockSummary(conflictBlock, courseMap)}와 시간이 겹칩니다.`
   }
 
