@@ -37,7 +37,6 @@ export const PlannerSelect = ({
 }: PlannerSelectProps) => {
   const labelId = useId()
   const listboxId = useId()
-  const valueId = useId()
   const selectRef = useRef<HTMLDivElement>(null)
   const selectedIndex = getSelectedOptionIndex(options, value)
   const [isOpen, setIsOpen] = useState(false)
@@ -123,7 +122,7 @@ export const PlannerSelect = ({
           aria-controls={listboxId}
           aria-expanded={isOpen}
           aria-haspopup="listbox"
-          aria-labelledby={`${labelId} ${valueId}`}
+          aria-labelledby={labelId}
           className={
             value ? 'planner-select__trigger' : 'planner-select__trigger is-empty'
           }
@@ -139,7 +138,7 @@ export const PlannerSelect = ({
           role="combobox"
           type="button"
         >
-          <span className="planner-select__value" id={valueId}>
+          <span className="planner-select__value">
             {selectedOption.color ? (
               <span
                 aria-hidden="true"
