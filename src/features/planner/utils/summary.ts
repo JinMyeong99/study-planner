@@ -1,5 +1,6 @@
 import type { StudyBlock } from '../types'
 import { getBlockDurationMinutes } from './grid'
+import { PLANNER_MINUTES_PER_HOUR } from './time'
 
 export const calculateTotalMinutes = (blocks: StudyBlock[]): number =>
   blocks.reduce((sum, block) => sum + getBlockDurationMinutes(block), 0)
@@ -33,8 +34,8 @@ export const calculateMinutesByCourse = (
 export const formatStudyDuration = (minutes: number): string => {
   if (minutes === 0) return '0분'
 
-  const hours = Math.floor(minutes / 60)
-  const mins = minutes % 60
+  const hours = Math.floor(minutes / PLANNER_MINUTES_PER_HOUR)
+  const mins = minutes % PLANNER_MINUTES_PER_HOUR
 
   if (hours === 0) return `${mins}분`
   if (mins === 0) return `${hours}시간`

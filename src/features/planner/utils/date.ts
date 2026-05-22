@@ -10,7 +10,6 @@ export const PLANNER_WEEKDAY_LABELS = [
 
 const DATE_PATTERN = /^(\d{4})-(\d{2})-(\d{2})$/
 const DAYS_IN_WEEK = 7
-const LAST_WEEKDAY_OFFSET = DAYS_IN_WEEK - 1
 
 const createLocalDate = (year: number, month: number, day: number) =>
   new Date(year, month - 1, day)
@@ -101,7 +100,7 @@ export const getWeekDateRangeLabel = (weekStart: string) => {
   const startDate = parseLocalDate(weekStart)
   const endDate = new Date(startDate)
 
-  endDate.setDate(startDate.getDate() + LAST_WEEKDAY_OFFSET)
+  endDate.setDate(startDate.getDate() + DAYS_IN_WEEK - 1)
 
   if (startDate.getFullYear() === endDate.getFullYear()) {
     return `${startDate.getFullYear()}년 ${formatMonthDay(

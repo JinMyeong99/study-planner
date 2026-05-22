@@ -39,8 +39,10 @@ export const weekdayOptions: PlannerSelectOption[] = PLANNER_WEEKDAY_LABELS.map(
   }),
 )
 
+const COURSE_SELECT_PLACEHOLDER = '강의 선택'
+
 export const createCourseOptions = (courses: Course[]): PlannerSelectOption[] => [
-  { label: '강의 선택', value: '' },
+  { label: COURSE_SELECT_PLACEHOLDER, value: '' },
   ...courses.map((course) => ({
     color: course.color,
     label: course.title,
