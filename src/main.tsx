@@ -38,11 +38,20 @@ const enableMocking = async () => {
 
   const { worker } = await import('./mocks/browser')
 
-  await worker.start({
-    onUnhandledRequest: 'bypass',
+  const workerConfig = {
+    onUnhandledRequest: 'bypass' as const,
     serviceWorker: {
       url: '/mockServiceWorker.js',
     },
+  }
+
+  await worker.start(workerConfig)
+
+  window.addEventListener('beforeunload', () => {
+    setTimeout(() => {
+      worker.stop()
+      void worker.start(workerConfig)
+    }, 0)
   })
 }
 
