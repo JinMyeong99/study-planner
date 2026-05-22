@@ -162,7 +162,7 @@ export const PlannerBlockModal = ({
           ) : null}
 
           <div className="planner-modal__actions">
-            {mode === 'edit' && onDelete ? (
+            {onDelete ? (
               <div className="planner-modal__delete">
                 <button
                   className="planner-modal__danger-button"
