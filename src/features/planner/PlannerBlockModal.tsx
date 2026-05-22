@@ -4,7 +4,7 @@ import './PlannerBlockModal.css'
 
 import { ConfirmDialog } from './ConfirmDialog'
 import type { Course, PlannerBlockFormValues, StudyBlock } from './types'
-import { createCourseMap } from './utils/course'
+import { createCourseMap } from './utils/blocks'
 import {
   createCourseOptions,
   endTimeSelectOptions,

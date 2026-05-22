@@ -3,7 +3,7 @@ import { useState, useMemo, type CSSProperties } from 'react'
 import './PlannerWeekGrid.css'
 import { PLANNER_BLOCK_FALLBACK_COLOR } from './constants'
 import type { Course, StudyBlock } from './types'
-import { createCourseMap } from './utils/course'
+import { createCourseMap } from './utils/blocks'
 import { getWeekdayDateLabels, PLANNER_WEEKDAY_LABELS } from './utils/date'
 import {
   createPlannerHourLabels,

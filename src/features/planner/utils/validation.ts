@@ -1,6 +1,6 @@
 import type { Course, PlannerBlockFormValues, StudyBlock } from '../types'
 import { areBlocksOverlapping } from './conflict'
-import { createCourseMap } from './course'
+import { createCourseMap } from './blocks'
 import { isValidPlannerTimeRange } from './time'
 import { formatBlockSummary } from './save'
 
