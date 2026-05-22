@@ -1,5 +1,4 @@
-import type { Course, StudyBlock } from '../types'
-import type { PlannerBlockFormValues } from '../PlannerBlockModal'
+import type { Course, PlannerBlockFormValues, StudyBlock } from '../types'
 import { areBlocksOverlapping } from './conflict'
 import { createCourseMap } from './course'
 import { formatDayOfWeek } from './date'

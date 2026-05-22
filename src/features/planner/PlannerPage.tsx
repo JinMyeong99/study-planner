@@ -3,10 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { PlannerApiError, savePlanner } from './api'
 import { PlannerBlockList } from './PlannerBlockList'
-import {
-  PlannerBlockModal,
-  type PlannerBlockFormValues,
-} from './PlannerBlockModal'
+import { PlannerBlockModal } from './PlannerBlockModal'
 import {
   formatLocalDate,
   getWeekDateRangeLabel,
@@ -30,24 +27,13 @@ import { useUnsavedChangesWarning } from './hooks/useUnsavedChangesWarning'
 import { useWeekNavigation } from './hooks/useWeekNavigation'
 import { PlannerSummary } from './PlannerSummary'
 import { PlannerWeekGrid } from './PlannerWeekGrid'
-import type { StudyBlock } from './types'
+import type { PlannerBlockFormValues, PlannerModalState } from './types'
 import { plannerQueryKeys } from './queryKeys'
 import './PlannerPage.css'
 
 export interface PlannerPageProps {
   initialWeekStart?: string
 }
-
-type PlannerModalState =
-  | {
-      mode: 'create'
-      initialValues: PlannerBlockFormValues
-    }
-  | {
-      block: StudyBlock
-      mode: 'edit'
-      initialValues: PlannerBlockFormValues
-    }
 
 const WEEK_CHANGE_CONFIRM_TITLE = '저장되지 않은 변경 사항이 있습니다'
 const WEEK_CHANGE_CONFIRM_DESCRIPTION =
