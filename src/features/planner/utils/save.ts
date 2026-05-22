@@ -4,12 +4,10 @@ import type {
   StudyBlock,
 } from '../types'
 import type { TimeConflictPair } from './conflict'
+import { createCourseMap } from './course'
 import { formatDayOfWeek } from './date'
 
 const isDraftBlockId = (blockId: string) => blockId.startsWith('draft-')
-
-const createCourseMap = (courses: Course[]) =>
-  new Map(courses.map((course) => [course.id, course]))
 
 const formatBlockSummary = (
   block: StudyBlock,

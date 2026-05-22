@@ -9,6 +9,7 @@ import {
 
 import type { Course, StudyBlock } from './types'
 import { areBlocksOverlapping } from './utils/conflict'
+import { createCourseMap } from './utils/course'
 import { formatDayOfWeek, PLANNER_WEEKDAY_LABELS } from './utils/date'
 import {
   formatMinutesToTime,
@@ -69,9 +70,6 @@ const createPlannerTimeOptions = () => {
 const timeOptions = createPlannerTimeOptions()
 const startTimeOptions = timeOptions.slice(0, -1)
 const endTimeOptions = timeOptions.slice(1)
-
-const createCourseMap = (courses: Course[]) =>
-  new Map(courses.map((course) => [course.id, course]))
 
 const getSelectedOptionIndex = (
   options: PlannerSelectOption[],
