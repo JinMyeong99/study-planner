@@ -1,7 +1,7 @@
 .planner-select {
   display: grid;
   gap: 8px;
-  color: #344054;
+  color: var(--planner-text-strong);
   font-weight: 800;
 }
 
@@ -15,11 +15,11 @@
   justify-content: space-between;
   gap: 12px;
   width: 100%;
-  border: 1px solid rgba(18, 27, 47, 0.12);
+  border: 1px solid var(--planner-line-strong);
   border-radius: 16px;
   padding: 12px 14px;
-  background: #ffffff;
-  color: #172033;
+  background: var(--planner-surface);
+  color: var(--planner-text);
   font: inherit;
   text-align: left;
   cursor: pointer;
@@ -27,13 +27,13 @@
 
 .planner-select__trigger:hover,
 .planner-select__trigger:focus-visible {
-  border-color: rgba(74, 144, 217, 0.46);
-  box-shadow: 0 0 0 4px rgba(74, 144, 217, 0.12);
+  border-color: rgba(20, 99, 255, 0.46);
+  box-shadow: 0 0 0 4px var(--planner-primary-tint);
   outline: none;
 }
 
 .planner-select__trigger.is-empty {
-  color: #667085;
+  color: var(--planner-text-muted);
 }
 
 .planner-select__value {
@@ -45,7 +45,7 @@
 
 .planner-select__chevron {
   flex-shrink: 0;
-  color: #667085;
+  color: var(--planner-text-muted);
   font-size: 1rem;
   line-height: 1;
 }
@@ -69,12 +69,10 @@
   overflow: auto;
   margin-top: 0;
   padding: 6px;
-  border: 1px solid rgba(18, 27, 47, 0.1);
+  border: 1px solid var(--planner-line);
   border-radius: 16px;
-  background: #ffffff;
-  box-shadow:
-    0 4px 6px rgba(18, 27, 47, 0.06),
-    0 16px 40px rgba(18, 27, 47, 0.16);
+  background: var(--planner-surface);
+  box-shadow: var(--planner-shadow-popover);
 }
 
 .planner-select__option {
@@ -86,7 +84,7 @@
   border-radius: 12px;
   padding: 10px 12px;
   background: transparent;
-  color: #344054;
+  color: var(--planner-text-strong);
   font: inherit;
   text-align: left;
   cursor: pointer;
@@ -94,11 +92,11 @@
 
 .planner-select__option:hover,
 .planner-select__option.is-active {
-  background: #eef6ff;
-  color: #155c9f;
+  background: var(--planner-primary-soft);
+  color: var(--planner-primary-strong);
 }
 
 .planner-select__option[aria-selected='true'] {
-  background: #eaf3ff;
-  color: #155c9f;
+  background: var(--planner-primary-soft);
+  color: var(--planner-primary-strong);
 }
