@@ -13,7 +13,7 @@
   border: 1px solid var(--planner-line);
   border-bottom: 0;
   border-radius: 18px 18px 0 0;
-  background: linear-gradient(180deg, var(--planner-surface-soft), var(--planner-bg-accent));
+  background: linear-gradient(160deg, var(--planner-surface) 0%, var(--planner-primary-soft) 100%);
 }
 
 .planner-week-grid__header strong {
