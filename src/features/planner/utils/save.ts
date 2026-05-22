@@ -4,7 +4,7 @@ import type {
   StudyBlock,
 } from '../types'
 import type { TimeConflictPair } from './conflict'
-import { createCourseMap } from './course'
+import { createCourseMap } from './blocks'
 import { formatDayOfWeek } from './date'
 
 const isDraftBlockId = (blockId: string) => blockId.startsWith('draft-')

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 
 import type { StudyBlock } from '../types'
-import { sortPlannerBlocks } from '../utils/sort'
+import { sortPlannerBlocks } from '../utils/blocks'
 
 interface DraftBlocksOverride {
   weekStart: string

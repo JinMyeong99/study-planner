@@ -59,6 +59,12 @@ export interface PlannerBlockFormValues {
   memo: string
 }
 
+export interface PlannerSelectOption {
+  color?: string
+  label: string
+  value: string
+}
+
 export type PlannerModalState =
   | {
       mode: 'create'

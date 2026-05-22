@@ -1,5 +1,5 @@
 import type { Course } from '../types'
-import type { PlannerSelectOption } from '../PlannerSelect'
+import type { PlannerSelectOption } from '../types'
 import { PLANNER_WEEKDAY_LABELS } from './date'
 import {
   formatMinutesToTime,

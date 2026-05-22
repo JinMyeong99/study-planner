@@ -2,8 +2,8 @@ import { useMemo, useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { PlannerApiError, savePlanner } from './api'
-import { PlannerBlockList } from './PlannerBlockList'
-import { PlannerBlockModal } from './PlannerBlockModal'
+import { PlannerBlockList } from './components/PlannerBlockList'
+import { PlannerBlockModal } from './components/PlannerBlockModal'
 import {
   formatLocalDate,
   getWeekDateRangeLabel,
@@ -25,9 +25,9 @@ import { useEditablePlannerState } from './hooks/useEditablePlannerState'
 import { usePlannerData } from './hooks/usePlannerData'
 import { useUnsavedChangesWarning } from './hooks/useUnsavedChangesWarning'
 import { useWeekNavigation } from './hooks/useWeekNavigation'
-import { ConfirmDialog } from './ConfirmDialog'
-import { PlannerSummary } from './PlannerSummary'
-import { PlannerWeekGrid } from './PlannerWeekGrid'
+import { ConfirmDialog } from './components/ConfirmDialog'
+import { PlannerSummary } from './components/PlannerSummary'
+import { PlannerWeekGrid } from './components/PlannerWeekGrid'
 import type { PlannerBlockFormValues, PlannerModalState } from './types'
 import { plannerQueryKeys } from './queryKeys'
 import './PlannerPage.css'

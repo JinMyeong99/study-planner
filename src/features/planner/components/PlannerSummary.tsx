@@ -13,14 +13,14 @@ import {
   YAxis,
 } from 'recharts'
 
-import type { Course, StudyBlock } from './types'
-import { formatDayOfWeek } from './utils/date'
+import type { Course, StudyBlock } from '../types'
+import { formatDayOfWeek } from '../utils/date'
 import {
   calculateMinutesByCourse,
   calculateMinutesByDay,
   calculateTotalMinutes,
   formatStudyDuration,
-} from './utils/summary'
+} from '../utils/summary'
 
 interface PlannerSummaryProps {
   blocks: StudyBlock[]
