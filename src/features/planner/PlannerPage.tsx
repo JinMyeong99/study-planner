@@ -14,7 +14,9 @@ import {
   getWeekStartDate,
 } from './utils/date'
 import { findFirstTimeConflict } from './utils/conflict'
-import { getNextPlannerSlotTime, parseTimeToMinutes } from './utils/time'
+import { getNextPlannerSlotTime } from './utils/time'
+import { createCourseMap } from './utils/course'
+import { sortPlannerBlocks } from './utils/sort'
 import {
   createSavePlannerPayload,
   formatConflictMessage,
@@ -54,21 +56,6 @@ type SaveFeedback =
 const WEEK_CHANGE_CONFIRM_TITLE = '저장되지 않은 변경 사항이 있습니다'
 const WEEK_CHANGE_CONFIRM_DESCRIPTION =
   '다른 주로 이동하면 현재 주의 변경 사항이 사라집니다.'
-
-const sortPlannerBlocks = (blocks: StudyBlock[]) =>
-  [...blocks].sort((firstBlock, secondBlock) => {
-    const firstStart = parseTimeToMinutes(firstBlock.startTime) ?? 0
-    const secondStart = parseTimeToMinutes(secondBlock.startTime) ?? 0
-
-    return (
-      firstBlock.dayOfWeek - secondBlock.dayOfWeek ||
-      firstStart - secondStart ||
-      firstBlock.endTime.localeCompare(secondBlock.endTime)
-    )
-  })
-
-const createCourseMap = (courses: Course[]) =>
-  new Map(courses.map((course) => [course.id, course]))
 
 const getCurrentWeekStart = () => formatLocalDate(getWeekStartDate(new Date()))
 

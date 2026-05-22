@@ -1,6 +1,7 @@
 import { useState, useMemo, type CSSProperties } from 'react'
 
 import type { Course, StudyBlock } from './types'
+import { createCourseMap } from './utils/course'
 import { getWeekdayDateLabels, PLANNER_WEEKDAY_LABELS } from './utils/date'
 import {
   createPlannerHourLabels,
@@ -25,9 +26,6 @@ const gridStyle = {
   '--planner-slot-height': `${PLANNER_GRID_SLOT_HEIGHT}px`,
   '--planner-slot-count': timeSlots.length,
 } as CSSProperties
-
-const createCourseMap = (courses: Course[]) =>
-  new Map(courses.map((course) => [course.id, course]))
 
 const getCourseBackground = (color: string) => `${color}1f`
 
