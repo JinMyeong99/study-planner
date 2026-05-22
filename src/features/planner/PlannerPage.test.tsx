@@ -88,8 +88,10 @@ describe('PlannerPage', () => {
 
     renderWithQueryClient(<PlannerPage initialWeekStart="2026-05-18" />)
 
-    expect(await screen.findAllByText('React 상태 관리')).toHaveLength(3)
-    expect(screen.getAllByText('TypeScript 기초')).toHaveLength(3)
+    await waitFor(() => {
+      expect(screen.getAllByText('React 상태 관리')).toHaveLength(3)
+      expect(screen.getAllByText('TypeScript 기초')).toHaveLength(3)
+    })
     expect(screen.getByText('월요일 · 09:00 - 10:30')).toBeInTheDocument()
     expect(screen.getByText('수요일 · 14:00 - 16:00')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: '저장' })).toBeDisabled()
