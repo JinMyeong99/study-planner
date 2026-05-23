@@ -56,11 +56,22 @@ const deserializeStore = (raw: string): Map<string, StudyBlock[]> => {
   }
 }
 
+const deriveNextBlockId = (map: Map<string, StudyBlock[]>): number => {
+  let max = 0
+  for (const blocks of map.values()) {
+    for (const block of blocks) {
+      const match = /^block-(\d+)$/.exec(block.id)
+      if (match) max = Math.max(max, parseInt(match[1], 10))
+    }
+  }
+  return max + 1
+}
+
 const stored = localStorage.getItem(STORAGE_KEY)
 let plannerBlocksByWeek = stored
   ? deserializeStore(stored)
   : clonePlannerMap(initialPlannerBlocksByWeek)
-let nextBlockId = 1
+let nextBlockId = deriveNextBlockId(plannerBlocksByWeek)
 
 const createBlockId = () => {
   const id = `block-${nextBlockId}`
