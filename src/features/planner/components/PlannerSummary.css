@@ -99,6 +99,11 @@
   white-space: nowrap;
 }
 
+.planner-summary__name--empty,
+.planner-summary__duration--empty {
+  color: var(--planner-text-subtle);
+}
+
 @keyframes planner-skeleton-shimmer {
   from { background-position: -200% 0; }
   to   { background-position:  200% 0; }
