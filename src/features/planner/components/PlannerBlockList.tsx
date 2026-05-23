@@ -32,12 +32,13 @@ export const PlannerBlockList = ({
     <ul className="planner-block-list">
       {sortedBlocks.map((block) => {
         const course = courseMap.get(block.courseId)
+        const courseTitle = course?.title ?? '알 수 없는 강의'
         const hasConflict = conflictBlockIds.has(block.id)
 
         return (
           <li key={block.id}>
             <button
-              aria-label={`${course?.title ?? '알 수 없는 강의'} ${formatDayOfWeek(block.dayOfWeek)}요일 ${block.startTime} - ${block.endTime} 편집`}
+              aria-label={`${courseTitle} ${formatDayOfWeek(block.dayOfWeek)}요일 ${block.startTime} - ${block.endTime} 편집`}
               className={
                 hasConflict
                   ? 'planner-block-card is-conflict'
@@ -54,7 +55,7 @@ export const PlannerBlockList = ({
                 style={{ backgroundColor: course?.color ?? PLANNER_BLOCK_FALLBACK_COLOR }}
               />
               <span className="planner-block-card__content">
-                <strong>{course?.title ?? '알 수 없는 강의'}</strong>
+                <strong>{courseTitle}</strong>
                 <span>
                   {formatDayOfWeek(block.dayOfWeek)}요일 · {block.startTime} -{' '}
                   {block.endTime}
