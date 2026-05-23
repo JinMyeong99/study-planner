@@ -22,16 +22,18 @@
 .confirm-dialog__title {
   margin: 0;
   color: var(--planner-text);
-  font-size: 0.95rem;
+  font-size: 1.05rem;
   font-weight: 700;
   line-height: 1.5;
   text-align: center;
+  word-break: keep-all;
+  overflow-wrap: break-word;
 }
 
 .confirm-dialog__description {
   margin: 0;
   color: var(--planner-text-muted);
-  font-size: 0.92rem;
+  font-size: 0.95rem;
   font-weight: 600;
   line-height: 1.55;
 }
@@ -43,3 +45,14 @@
   gap: 8px;
   margin-top: 4px;
 }
+
+.confirm-dialog .planner-modal__danger-button {
+  background: var(--planner-primary);
+  color: var(--planner-surface);
+}
+
+.confirm-dialog .planner-modal__danger-button:hover,
+.confirm-dialog .planner-modal__danger-button:focus-visible {
+  background: var(--planner-primary-strong);
+}
+
