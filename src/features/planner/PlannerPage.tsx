@@ -1,4 +1,4 @@
-import { lazy, Suspense, useMemo, useState } from 'react'
+import { lazy, Suspense, useCallback, useMemo, useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { PlannerApiError, savePlanner } from './api'
@@ -28,7 +28,7 @@ import { useEditablePlannerState } from './hooks/useEditablePlannerState'
 import { usePlannerData } from './hooks/usePlannerData'
 import { useUnsavedChangesWarning } from './hooks/useUnsavedChangesWarning'
 import { useWeekNavigation } from './hooks/useWeekNavigation'
-import type { PlannerBlockFormValues, PlannerModalState } from './types'
+import type { PlannerBlockFormValues, PlannerModalState, StudyBlock } from './types'
 import { plannerQueryKeys } from './queryKeys'
 import './PlannerPage.css'
 
@@ -119,6 +119,17 @@ export const PlannerPage = ({ initialWeekStart }: PlannerPageProps) => {
   const closeModal = () => {
     setModalState(null)
   }
+
+  const openEditModal = useCallback((block: StudyBlock) => {
+    setModalState({ block, mode: 'edit', initialValues: createFormValuesFromBlock(block) })
+  }, [])
+
+  const openCreateModal = useCallback(
+    (selection: { dayOfWeek: number; startTime: string }) => {
+      setModalState({ mode: 'create', initialValues: createFormValuesFromSlot(selection) })
+    },
+    [],
+  )
 
   const handleModalSubmit = (values: PlannerBlockFormValues) => {
     clearToast()
@@ -233,19 +244,8 @@ export const PlannerPage = ({ initialWeekStart }: PlannerPageProps) => {
               conflictBlockIds={conflictBlockIds}
               courses={plannerData.courses}
               weekStart={weekStart}
-              onBlockClick={(block) => {
-                setModalState({
-                  block,
-                  mode: 'edit',
-                  initialValues: createFormValuesFromBlock(block),
-                })
-              }}
-              onSlotClick={(selection) => {
-                setModalState({
-                  mode: 'create',
-                  initialValues: createFormValuesFromSlot(selection),
-                })
-              }}
+              onBlockClick={openEditModal}
+              onSlotClick={openCreateModal}
             />
             <div className="planner-grid-footer">
               {editablePlanner.isDirty ? (
@@ -281,13 +281,7 @@ export const PlannerPage = ({ initialWeekStart }: PlannerPageProps) => {
                 blocks={editablePlanner.draftBlocks}
                 conflictBlockIds={conflictBlockIds}
                 courses={plannerData.courses}
-                onBlockSelect={(block) => {
-                  setModalState({
-                    block,
-                    mode: 'edit',
-                    initialValues: createFormValuesFromBlock(block),
-                  })
-                }}
+                onBlockSelect={openEditModal}
               />
             </section>
           </div>

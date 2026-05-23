@@ -42,11 +42,16 @@ const getBlocksByDay = (blocks: StudyBlock[]) => {
   return byDay
 }
 
-const getBlockClassName = (durationMinutes: number, hasMemo: boolean) =>
+const getBlockClassName = (
+  durationMinutes: number,
+  hasMemo: boolean,
+  hasConflict: boolean,
+) =>
   [
     'planner-week-grid__block',
     durationMinutes <= 30 ? 'is-compact' : '',
     durationMinutes >= 90 && hasMemo ? 'has-large-memo-preview' : '',
+    hasConflict ? 'is-conflict' : '',
   ]
     .filter(Boolean)
     .join(' ')
@@ -177,15 +182,11 @@ export const PlannerWeekGrid = ({
               return (
                 <button
                   aria-label={`${courseTitle} ${block.startTime} - ${block.endTime} 편집`}
-                  className={[
-                    getBlockClassName(
-                      placement.durationMinutes,
-                      Boolean(block.memo),
-                    ),
-                    hasConflict ? 'is-conflict' : '',
-                  ]
-                    .filter(Boolean)
-                    .join(' ')}
+                  className={getBlockClassName(
+                    placement.durationMinutes,
+                    Boolean(block.memo),
+                    hasConflict,
+                  )}
                   key={block.id}
                   onClick={() => {
                     onBlockClick(block)

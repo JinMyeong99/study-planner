@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 
 import type { StudyBlock } from '../types'
 import { sortPlannerBlocks } from '../utils/blocks'
@@ -96,8 +96,10 @@ export const useEditablePlannerState = ({
     )
   }
 
-  const isDirty =
-    serializePlannerBlocks(activeDraftBlocks) !== serializePlannerBlocks(savedBlocks)
+  const isDirty = useMemo(
+    () => serializePlannerBlocks(activeDraftBlocks) !== serializePlannerBlocks(savedBlocks),
+    [activeDraftBlocks, savedBlocks],
+  )
 
   return {
     savedBlocks,
