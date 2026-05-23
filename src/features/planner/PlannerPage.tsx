@@ -5,6 +5,7 @@ import { PlannerApiError, savePlanner } from './api'
 import { ConfirmDialog } from './components/ConfirmDialog'
 import { PlannerBlockList } from './components/PlannerBlockList'
 import { PlannerBlockModal } from './components/PlannerBlockModal'
+import { PlannerSummarySkeleton } from './components/PlannerSummarySkeleton'
 import { PlannerWeekGrid } from './components/PlannerWeekGrid'
 import {
   formatLocalDate,
@@ -262,7 +263,7 @@ export const PlannerPage = ({ initialWeekStart }: PlannerPageProps) => {
           </section>
 
           <div className="planner-side">
-            <Suspense fallback={<div className="planner-summary" />}>
+            <Suspense fallback={<PlannerSummarySkeleton />}>
               <PlannerSummary
                 blocks={editablePlanner.draftBlocks}
                 courses={plannerData.courses}
