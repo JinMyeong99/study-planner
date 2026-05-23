@@ -32,6 +32,28 @@
   margin-bottom: 12px;
 }
 
+.planner-summary__tooltip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 1px solid var(--planner-line);
+  border-radius: 8px;
+  background: var(--planner-surface);
+  box-shadow: 0 10px 24px rgba(32, 43, 68, 0.14);
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+
+.planner-summary__tooltip-name,
+.planner-summary__tooltip-value {
+  font-weight: 800;
+}
+
+.planner-summary__tooltip-value {
+  color: var(--planner-text-mid);
+}
+
 .planner-summary__label {
   margin: 0 0 12px;
   color: var(--planner-text-muted);

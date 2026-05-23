@@ -29,7 +29,8 @@ const gridStyle = {
   '--planner-slot-count': timeSlots.length,
 } as CSSProperties
 
-const getCourseBackground = (color: string) => `${color}1f`
+const getCourseBackground = (color: string) =>
+  `color-mix(in srgb, ${color} 12%, var(--planner-surface))`
 
 const getBlocksByDay = (blocks: StudyBlock[]) => {
   const byDay: StudyBlock[][] = Array.from({ length: 7 }, () => [])

@@ -10,6 +10,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts'
+import type { TooltipContentProps } from 'recharts'
 
 import type { Course, StudyBlock } from '../types'
 import { formatDayOfWeek } from '../utils/date'
@@ -26,6 +27,62 @@ const PLANNER_PRIMARY_COLOR = '#FC1150'
 interface PlannerSummaryProps {
   blocks: StudyBlock[]
   courses: Course[]
+}
+
+interface SummaryTooltipPayload {
+  name?: unknown
+  percentageLabel?: string
+}
+
+const formatStudyPercentage = (minutes: number, totalMinutes: number) => {
+  if (totalMinutes === 0) return '0%'
+
+  const percentage = (minutes / totalMinutes) * 100
+
+  if (percentage > 0 && percentage < 1) return '1% 미만'
+
+  return `${Math.round(percentage)}%`
+}
+
+const formatTooltipValue = (
+  value: unknown,
+  percentageLabel?: string,
+) => {
+  if (typeof value !== 'number') return ''
+
+  return `${formatStudyDuration(value)} · ${percentageLabel ?? '0%'}`
+}
+
+const getTooltipName = (name: unknown) =>
+  typeof name === 'string' || typeof name === 'number' ? name : '학습 시간'
+
+const PlannerSummaryTooltip = ({
+  active,
+  payload,
+}: TooltipContentProps) => {
+  const item = payload?.[0]
+
+  if (!active || !item) return null
+
+  const itemPayload = item.payload as SummaryTooltipPayload | undefined
+  const tooltipValue = formatTooltipValue(
+    item.value,
+    itemPayload?.percentageLabel,
+  )
+
+  if (!tooltipValue) return null
+
+  return (
+    <div className="planner-summary__tooltip">
+      <span
+        className="planner-summary__tooltip-name"
+        style={item.color ? { color: item.color } : undefined}
+      >
+        {getTooltipName(itemPayload?.name)}
+      </span>
+      <span className="planner-summary__tooltip-value">{tooltipValue}</span>
+    </div>
+  )
 }
 
 export const PlannerSummary = ({ blocks, courses }: PlannerSummaryProps) => {
@@ -51,8 +108,12 @@ export const PlannerSummary = ({ blocks, courses }: PlannerSummaryProps) => {
         name: course.title,
         minutes: minutesByCourse.get(course.id) ?? 0,
         fill: course.color,
+        percentageLabel: formatStudyPercentage(
+          minutesByCourse.get(course.id) ?? 0,
+          totalMinutes,
+        ),
       })),
-    [activeCourses, minutesByCourse],
+    [activeCourses, minutesByCourse, totalMinutes],
   )
 
   const dayChartData = useMemo(
@@ -60,8 +121,12 @@ export const PlannerSummary = ({ blocks, courses }: PlannerSummaryProps) => {
       activeDays.map((day) => ({
         name: formatDayOfWeek(day),
         minutes: minutesByDay.get(day) ?? 0,
+        percentageLabel: formatStudyPercentage(
+          minutesByDay.get(day) ?? 0,
+          totalMinutes,
+        ),
       })),
-    [activeDays, minutesByDay],
+    [activeDays, minutesByDay, totalMinutes],
   )
 
   return (
@@ -96,14 +161,7 @@ export const PlannerSummary = ({ blocks, courses }: PlannerSummaryProps) => {
                       <Cell key={entry.name} fill={entry.fill} />
                     ))}
                   </Pie>
-                  <Tooltip
-                    formatter={(value) => [
-                      typeof value === 'number'
-                        ? formatStudyDuration(value)
-                        : '',
-                      '학습 시간',
-                    ]}
-                  />
+                  <Tooltip content={PlannerSummaryTooltip} />
                 </PieChart>
               </ResponsiveContainer>
             </div>
@@ -149,14 +207,7 @@ export const PlannerSummary = ({ blocks, courses }: PlannerSummaryProps) => {
                     tickLine={false}
                   />
                   <Bar dataKey="minutes" radius={[0, 4, 4, 0]} fill={PLANNER_PRIMARY_COLOR} />
-                  <Tooltip
-                    formatter={(value) => [
-                      typeof value === 'number'
-                        ? formatStudyDuration(value)
-                        : '',
-                      '학습 시간',
-                    ]}
-                  />
+                  <Tooltip content={PlannerSummaryTooltip} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
